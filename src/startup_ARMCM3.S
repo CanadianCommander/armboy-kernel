@@ -87,7 +87,47 @@ __isr_vector:
 	.long	defaultVector       /* SysTick Handler */
 
 	/* External interrupts */
-	.long	Default_Handler
+  .long defaultVector /**<  0 SAM3X8E Supply Controller (SUPC) */
+  .long defaultVector /**<  1 SAM3X8E Reset Controller (RSTC) */
+  .long defaultVector /**<  2 SAM3X8E Real Time Clock (RTC) */
+  .long defaultVector /**<  3 SAM3X8E Real Time Timer (RTT) */
+  .long defaultVector /**<  4 SAM3X8E Watchdog Timer (WDT) */
+  .long defaultVector /**<  5 SAM3X8E Power Management Controller (PMC) */
+  .long defaultVector /**<  6 SAM3X8E Enhanced Flash Controller 0 (EFC0) */
+  .long defaultVector /**<  7 SAM3X8E Enhanced Flash Controller 1 (EFC1) */
+  .long defaultVector /**<  8 SAM3X8E Universal Asynchronous Receiver Transceiver (UART) */
+  .long defaultVector /**<  9 SAM3X8E Static Memory Controller (SMC) */
+  .long defaultVector /**< 11 SAM3X8E Parallel I/O Controller A, (PIOA) */
+  .long defaultVector /**< 12 SAM3X8E Parallel I/O Controller B (PIOB) */
+  .long defaultVector /**< 13 SAM3X8E Parallel I/O Controller C (PIOC) */
+  .long defaultVector /**< 14 SAM3X8E Parallel I/O Controller D (PIOD) */
+  .long defaultVector /**< 17 SAM3X8E USART 0 (USART0) */
+  .long defaultVector /**< 18 SAM3X8E USART 1 (USART1) */
+  .long defaultVector /**< 19 SAM3X8E USART 2 (USART2) */
+  .long defaultVector /**< 20 SAM3X8E USART 3 (USART3) */
+  .long defaultVector /**< 21 SAM3X8E Multimedia Card Interface (HSMCI) */
+  .long defaultVector /**< 22 SAM3X8E Two-Wire Interface 0 (TWI0) */
+  .long defaultVector /**< 23 SAM3X8E Two-Wire Interface 1 (TWI1) */
+  .long defaultVector /**< 24 SAM3X8E Serial Peripheral Interface (SPI0) */
+  .long defaultVector /**< 26 SAM3X8E Synchronous Serial Controller (SSC) */
+  .long defaultVector /**< 27 SAM3X8E Timer Counter 0 (TC0) */
+  .long defaultVector /**< 28 SAM3X8E Timer Counter 1 (TC1) */
+  .long defaultVector /**< 29 SAM3X8E Timer Counter 2 (TC2) */
+  .long defaultVector /**< 30 SAM3X8E Timer Counter 3 (TC3) */
+  .long defaultVector /**< 31 SAM3X8E Timer Counter 4 (TC4) */
+  .long defaultVector /**< 32 SAM3X8E Timer Counter 5 (TC5) */
+  .long defaultVector /**< 33 SAM3X8E Timer Counter 6 (TC6) */
+  .long defaultVector /**< 34 SAM3X8E Timer Counter 7 (TC7) */
+  .long defaultVector /**< 35 SAM3X8E Timer Counter 8 (TC8) */
+  .long defaultVector /**< 36 SAM3X8E Pulse Width Modulation Controller (PWM) */
+  .long defaultVector /**< 37 SAM3X8E ADC Controller (ADC) */
+  .long defaultVector /**< 38 SAM3X8E DAC Controller (DACC) */
+  .long defaultVector /**< 39 SAM3X8E DMA Controller (DMAC) */
+  .long defaultVector /**< 40 SAM3X8E USB OTG High Speed (UOTGHS) */
+  .long defaultVector /**< 41 SAM3X8E True Random Number Generator (TRNG) */
+  .long defaultVector /**< 42 SAM3X8E Ethernet MAC (EMAC) */
+  .long defaultVector /**< 43 SAM3X8E CAN Controller 0 (CAN0) */
+  .long defaultVector /**< 44 SAM3X8E CAN Controller 1 (CAN1) */
 
 	.size	__isr_vector, . - __isr_vector
 

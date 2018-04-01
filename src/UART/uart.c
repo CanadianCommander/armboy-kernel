@@ -1,5 +1,7 @@
 #include "uart.h"
+#include "../Timers/timers.h"
 #include <sam3xa/include/sam3x8e.h>
+#include  <stdio.h>
 
 /*enable uart chip & channel 0 (for debug communcation).*/
 void initUART(void){
@@ -42,20 +44,30 @@ void initUART(void){
 /*
   override C std lib _write and _read methods
 */
-int _write (int fd, char *ptr, int len){
+int _write(int file, char *ptr, int len){
+  for(uint32_t i=0; i < len;){
     if(UART->UART_SR & UART_SR_TXRDY){
       //transmit one character
-      REG_UART_THR = *ptr;
-      return 1;
+      REG_UART_THR = *(ptr + i);
+      i++;
     }
-    else {
-      //UART not ready
-      return 0;
-    }
+  }
+  return len;
 }
 
 int _read (int fd, char *ptr, int len){
-  REG_PIOB_SODR |= PIO_PB27;
-  *ptr = 'c';
-  return 1;
+  uint32_t startTime = getTime();
+  int i=0;
+  for(i; i < len;){
+    if(UART->UART_SR & UART_SR_RXRDY){
+      //read one character
+      *(ptr + i) = (char)UART->UART_RHR;
+      i++;
+    }
+    if((startTime - getTime()) < -5 && i > 0){
+      //wait 5ms MAX
+      break;
+    }
+  }
+  return i;
 }

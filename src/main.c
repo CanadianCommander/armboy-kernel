@@ -1,23 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <memory.h>
 
 #include <sam3xa/include/sam3x8e.h>
 #include "UART/uart.h"
+#include "Timers/timers.h"
 
-
-// Addresses of several registers used to control the real-time timer.
-static volatile int * const timer_mode_register  = (int *)0x400E1A30;
-static volatile int * const timer_value_register = (int *)0x400E1A38;
-
-
-// As the name suggests, this function sleeps for a given number of
-// milliseconds. Our replacement for Arduino's delay function.
-void sleep_ms(int milliseconds) {
-	int sleep_until = *timer_value_register + milliseconds;
-	while (*timer_value_register < sleep_until) {}
-}
-
+// set up processor clock. ??? Mhz -> 84 Mhz
 void sysClockInit(void){
+  // ???? Mhz
   EFC0->EEFC_FMR = EEFC_FMR_FWS(4);
   EFC1->EEFC_FMR = EEFC_FMR_FWS(4);
 
@@ -31,13 +22,6 @@ void sysClockInit(void){
 
   //wait for select
   while(!(PMC->PMC_SR & PMC_SR_MOSCSELS));
-
-  //disable PMC clock
-  //PMC->CKGR_PLLAR = CKGR_PLLAR_ONE;
-  //PMC->CKGR_PLLAR = CKGR_PLLAR_ONE | CKGR_PLLAR_MULA(0xdUL) | CKGR_PLLAR_DIVA(0x1UL) | CKGR_PLLAR_PLLACOUNT(0x3fU);
-
-  //wait for PLL lock
-  //while(!(PMC->PMC_SR & PMC_SR_LOCKA));
 
   PMC->PMC_MCKR = (PMC->PMC_MCKR & ~(uint32_t)PMC_MCKR_CSS_Msk) | PMC_MCKR_CSS_MAIN_CLK;
 
@@ -76,33 +60,33 @@ void SystemInit()
 
   //init core modules
   initUART();
+  initRTT();
 }
 #endif
 
+//dump here if interrupt not handled!
 void defaultVector(){
   while(1){
-    sleep_ms(1000);
+    sleep(1000);
     REG_PIOB_SODR |= PIO_PB27;
-    sleep_ms(1000);
+    sleep(1000);
     REG_PIOB_CODR |= PIO_PB27;
   }
 }
 
 
-
 int main(void){
   //void * hTest = malloc(10);
-  char * input = "HELLO WORLD\n";
-  *timer_mode_register = 0x00000020;
+  char input[25];
+  printf("HELLO WORLD\n");
   int offset = 0;
   while(1){
-    sleep_ms(200);
-    _write(0,input + offset,12);
-    offset ++;
-    if(offset > 12){
-      offset = 0;
-    }
-    sleep_ms(200);
+    memset(input,0,25);
+    sleep(1000);
+    printf("HELLO WORLD\n");
+    sleep(1000);
+    scanf("%s",input);
+    printf("GOT: %s \n", input);
   }
   //printf("malloc at address %x", (unsigned long)hTest);
 }
