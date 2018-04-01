@@ -3,13 +3,13 @@ CC = arm-none-eabi-gcc
 CFLAGS = --std=gnu11 -O0 -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.specs -ffreestanding -Tgcc.ld -Wl,--entry=main
 INCLD = -I ../../../tools/ATMEL/ -I ../../../tools/CMSIS/include
 
-SRC_CC =  main.c UART/uart.c Timers/timers.c
+SRC_CC =  main.c UART/uart.c Timers/timers.c startup_ARMCM3.S
 
 kernel.bin : kernel.elf
 	$(OBYCP) -O binary kernel.elf kernel.bin
 
 kernel.elf : $(SRC_CC)
-	$(CC) $(CFLAGS) -o kernel.elf $^ startup_ARMCM3.S $(INCLD)
+	$(CC) $(CFLAGS) -o kernel.elf $^ $(INCLD)
 
 clean:
 	rm kernel.elf kernel.bin
