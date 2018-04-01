@@ -1,4 +1,4 @@
-# ARMBoy tm Kernel.
+# ARMBoy &trade; Kernel.
 the armboy kernel is the kernel used by the armboy gaming system. It is designed to run on a sam3x8e processor, based
 around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the ones found on the teensy boards.
 
