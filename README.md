@@ -3,7 +3,7 @@ the armboy kernel is the kernel used by the armboy gaming system. It is designed
 around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the ones found on the teensy boards.
 
 ### related repos
-*list here*
+- [sam3x8e hardware api](https://github.com/CanadianCommander/sam3x8eHardwareAPI)
 
 ## documentation  
 kernel documentation can be found in the github wiki (have to you know write the kernel before I can
