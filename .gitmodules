@@ -1,0 +1,3 @@
+[submodule "src/hardware/sam3x8eHardwareAPI"]
+	path = src/hardware/sam3x8eHardwareAPI
+	url = https://github.com/CanadianCommander/sam3x8eHardwareAPI.git
