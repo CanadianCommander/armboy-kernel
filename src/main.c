@@ -76,17 +76,14 @@ void defaultVector(){
 
 
 int main(void){
-  //void * hTest = malloc(10);
+
+  printf("=== ARM Boy ===\n");
+
   char input[25];
-  printf("HELLO WORLD\n");
-  int offset = 0;
   while(1){
     memset(input,0,25);
-    sleep(1000);
-    printf("HELLO WORLD\n");
     sleep(1000);
     scanf("%s",input);
     printf("GOT: %s \n", input);
   }
-  //printf("malloc at address %x", (unsigned long)hTest);
 }

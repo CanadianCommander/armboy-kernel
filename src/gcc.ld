@@ -171,10 +171,12 @@ SECTIONS
 
 	.heap (COPY):
 	{
+    __heap_base = .;
 		__end__ = .;
 		PROVIDE(end = .);
 		*(.heap*)
 		__HeapLimit = .;
+    __heap_limit = (. - __heap_base);
 	} > RAM
 
 	/* .stack_dummy section doesn't contains any symbols. It is only
@@ -183,14 +185,11 @@ SECTIONS
 	.stack_dummy (COPY):
 	{
 		*(.stack*)
+    __initial_sp = .;
 	} > RAM
 
-	/* Set stack top to end of RAM, and stack limit move down by
-	 * size of stack_dummy section */
-	__StackTop = __HeapLimit + SIZEOF(.stack_dummy);
-	__StackLimit = __StackTop - SIZEOF(.stack_dummy);
-	PROVIDE(__stack = __StackTop);
+  __StackTop = __HeapLimit + SIZEOF(.stack_dummy);
+  __StackLimit = __StackTop - SIZEOF(.stack_dummy);
+  PROVIDE(__stack = __StackTop);
 
-	/* Check if data + heap + stack exceeds RAM limit  200720d0*/
-	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }
