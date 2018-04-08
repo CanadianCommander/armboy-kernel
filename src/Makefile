@@ -13,6 +13,7 @@ kernel.bin : kernel.elf
 kernel.elf : $(SRC_CC)
 	$(CC) $(CFLAGS) -o kernel.elf $^ $(INCLD)
 
+.PHONY: hardware/api.a
 hardware/api.a : hardware/Makefile
 	(TARGET=$(TARGET); export TARGET ; make -C hardware ;)
 
