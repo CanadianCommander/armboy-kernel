@@ -2,8 +2,9 @@ OBYCP = arm-none-eabi-objcopy
 CC = arm-none-eabi-gcc
 CFLAGS = --std=gnu11 -O0 -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.specs -ffreestanding -Tgcc.ld -Wl,--entry=main
 INCLD = -I ../../../tools/ATMEL/ -I ../../../tools/CMSIS/include
+TARGET ?= sam3x8e # target board
 
-SRC_CC = *.c Timers/*.c UART/*.c EEFC/*.c #main.c UART/uart.c Timers/timers.c startup_ARMCM3.S
+SRC_CC = *.c startup_ARMCM3.S hardware/api.a
 SRC_O = *.o
 
 kernel.bin : kernel.elf
@@ -11,6 +12,9 @@ kernel.bin : kernel.elf
 
 kernel.elf : $(SRC_CC)
 	$(CC) $(CFLAGS) -o kernel.elf $^ $(INCLD)
+
+hardware/api.a : hardware/Makefile
+	(TARGET=$(TARGET); export TARGET ; make -C hardware ;)
 
 clean:
 	rm kernel.elf kernel.bin

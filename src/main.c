@@ -3,8 +3,8 @@
 #include <memory.h>
 
 #include <sam3xa/include/sam3x8e.h>
-#include "UART/uart.h"
-#include "Timers/timers.h"
+#include "hardware/sam3x8eHardwareAPI/src/UART/uart.h"
+#include "hardware/sam3x8eHardwareAPI/src/Timers/timers.h"
 
 // set up processor clock. ??? Mhz -> 84 Mhz
 void sysClockInit(void){
@@ -74,11 +74,15 @@ void defaultVector(){
   }
 }
 
+void printGreating(void){
+  register int stackPtr asm("sp");
+  printf("=== ARM Boy ===\n");
+  printf("SP: 0x%x\n", stackPtr);
+}
+
 
 int main(void){
-
-  printf("=== ARM Boy ===\n");
-
+  printGreating();
   char input[25];
   while(1){
     memset(input,0,25);
