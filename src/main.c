@@ -4,6 +4,7 @@
 
 #include <sam3xa/include/sam3x8e.h>
 #include "config.h"
+#include "util/debug.h"
 #include "hardware/hardware.h"
 
 #ifndef __NO_SYSTEM_INIT
@@ -35,15 +36,10 @@ void defaultVector(){
   }
 }
 
-void printGreating(void){
-  register int stackPtr asm("sp");
-  printf("=== ARM Boy ===\n");
-  printf("SP: 0x%x\n", stackPtr);
-}
-
-
 int main(void){
-  printGreating();
+  printSysInfo();
+
+  printf("=== ARM Boy ===\n");
   char input[25];
   while(1){
     memset(input,0,25);
