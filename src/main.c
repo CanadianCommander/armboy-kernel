@@ -40,11 +40,27 @@ int main(void){
   printSysInfo();
 
   printf("=== ARM Boy ===\n");
-  char input[25];
+  char input[300];
   while(1){
-    memset(input,0,25);
+    memset(input,0,300);
     sleep(1000);
+    printf("Entre page data: \n");
     scanf("%s",input);
-    printf("GOT: %s \n", input);
+    if(input[0] == 'r'){
+      uint8_t foo[256];
+      memset(foo,0,256);
+      printf("Reading page...\n");
+      if(!readPage(1,0,foo)){
+        printf("ERROR\n");
+      }
+      dumpHex((uint8_t *)foo,256);
+    }
+    else {
+      printf("\nWriting page...\n");
+      if(!writePage(1,0,input))
+      {
+        printf("ERROR\n");
+      }
+    }
   }
 }
