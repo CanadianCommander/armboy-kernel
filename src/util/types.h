@@ -1,5 +1,6 @@
 #ifndef UTIL_TYPES_H_
 #define UTIL_TYPES_H_
+#include <stdint.h>
 
 #define NULL 0
 #define TRUE 1

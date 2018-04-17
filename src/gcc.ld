@@ -188,7 +188,7 @@ SECTIONS
     __initial_sp = .;
 	} > RAM
 
-  __StackTop = __HeapLimit + SIZEOF(.stack_dummy);
+  __StackTop = 0x20087FFF;
   __StackLimit = __StackTop - SIZEOF(.stack_dummy);
   PROVIDE(__stack = __StackTop);
 

@@ -1,12 +1,11 @@
-#include <stdlib.h>
 #include <stdio.h>
-#include <memory.h>
 
 #include <sam3xa/include/sam3x8e.h>
 #include "config.h"
 #include "util/debug.h"
 #include "hardware/hardware.h"
 #include "kernelMonitor/kernelMonitor.h"
+#include "memoryManager/memoryManager.h"
 
 #ifndef __NO_SYSTEM_INIT
 void SystemInit()
@@ -39,6 +38,8 @@ void defaultVector(){
 
 int main(void){
   loadDefaultMonitorHandlers();
+  addMemoryDebugKernelMonitor();
+
   printSysInfo();
 
   printf("=== ARM Boy ===\n");

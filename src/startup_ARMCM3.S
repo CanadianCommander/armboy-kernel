@@ -46,14 +46,14 @@ __StackLimit:
 	.space	Stack_Size
 	.size	__StackLimit, . - __StackLimit
 __StackTop:
-	.size	__StackTop, . - __StackTop
+	.size	__StackTop, 0x20087FFF
 
 	.section .heap
 	.align	3
 #ifdef __HEAP_SIZE
 	.equ	Heap_Size, __HEAP_SIZE
 #else
-	.equ	Heap_Size, 0xc00
+	.equ	Heap_Size, 0x17FFF
 #endif
 	.globl	__HeapBase
 	.globl	__HeapLimit
