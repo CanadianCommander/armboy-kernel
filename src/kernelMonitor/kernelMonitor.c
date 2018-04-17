@@ -61,8 +61,10 @@ void removeMonitor(kMonitorHandler mon){
 }
 
 bool memPeak(char * line);
+bool memPoke(char * line);
 void loadDefaultMonitorHandlers(void){
   addMonitor(memPeak);
+  addMonitor(memPoke);
 }
 
 // dump memory locations to terminal
@@ -83,6 +85,29 @@ bool memPeak(char * line){
     return true;
   }
   else{
+    return false;
+  }
+}
+
+//change the value of a memory word.
+bool memPoke(char * line){
+  char callName[128];
+
+  //check for invocation
+  sscanf(line,"%128s",callName);
+  if(strcmp(callName,"poke") == 0){
+    uint32_t addr = 0;
+    uint32_t value = 0;
+    sscanf(line,"%*s %x %x", &addr, &value);
+    if(addr != 0){
+      *((uint32_t *)addr) = value;
+    }
+    else {
+      printf("bad arguments for poke. format is poke <address> <word value>\n");
+    }
+    return true;
+  }
+  else {
     return false;
   }
 }

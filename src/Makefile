@@ -21,14 +21,14 @@ clean:
 	rm kernel.elf kernel.bin
 
 reset:
-	stty -f /dev/cu.usbmodem14111 1200
+	stty -f /dev/cu.usbmodem14121 1200
 	sleep 1
-	stty -f /dev/cu.usbmodem14111 hupcl
+	stty -f /dev/cu.usbmodem14121 hupcl
 	sleep 1
 
 upload : kernel.bin reset
-	bossac -i --port=cu.usbmodem14111 -U=false -e -w -b kernel.bin
-	stty -f /dev/cu.usbmodem14111 9600 # restar board
+	bossac -i --port=cu.usbmodem14121 -U=false -e -w -b kernel.bin
+	stty -f /dev/cu.usbmodem14121 9600 # restar board
 	#cat /dev/cu.usbmodem14111
 
 #Note to self use "-Wl,--just-symbols=<.elf file>" to link in super yolo mode to the kernel
