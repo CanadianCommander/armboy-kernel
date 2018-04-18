@@ -1,11 +1,12 @@
 #include <stdio.h>
-
 #include <sam3xa/include/sam3x8e.h>
 #include "config.h"
 #include "util/debug.h"
 #include "hardware/hardware.h"
 #include "kernelMonitor/kernelMonitor.h"
 #include "memoryManager/memoryManager.h"
+#include "processManager/processManager.h"
+#pragma import(__use_no_heap)
 
 #ifndef __NO_SYSTEM_INIT
 void SystemInit()
@@ -19,10 +20,6 @@ void SystemInit()
 
   //disable watchdog
   REG_WDT_MR &= ~WDT_MR_WDRSTEN;
-
-  //init core modules
-  initUART();
-  initRTT();
 }
 #endif
 
@@ -37,9 +34,25 @@ void defaultVector(){
 }
 
 int main(void){
+  //init core modules
+  initUART();
+  initRTT();
+  //allocate dynamic memory. see config.h for size / location
+  allocateKernelMemory((uint8_t*)KERNEL_DYNAMIC_MEMORY_START,KERNEL_DYNAMIC_MEMORY);
+
+  //load monitor handlers
   loadDefaultMonitorHandlers();
   addMemoryDebugKernelMonitor();
 
+
+  //TMP TMP TMP
+  void * ptr = malloc_pid(256,KERNEL_PID);
+  while(ptr != NULL){
+    ptr = malloc_pid(256,KERNEL_PID);
+    printf("--- addr: %p \n", ptr);
+  }
+
+  //sys info is always nice
   printSysInfo();
 
   printf("=== ARM Boy ===\n");
