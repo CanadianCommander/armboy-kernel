@@ -22,6 +22,7 @@ struct MemoryHandle {
 #define BLOCK_LAST_ALLOC (1 << 1)
 #define HEAP_BASE        (1 << 2)
 #define HEAP_END         (1 << 3)
+#define BLOCK_DELETED    (1 << 4)
 #define BLOCK_LEN(header)(header >> 8)
 #define SET_BLOCK_LEN(len)((0xffffff & (len)) << 8)
 #define BLOCK_HEADER(len, alloc, lalloc, base, end) ((0xffffff & (len)) << 8) | ((0x1 & (alloc)) << 0) | ((0x1 & (lalloc)) << 1) | ((0x1 & (base)) << 2) | ((0x1 & (end)) << 3)

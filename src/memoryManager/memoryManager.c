@@ -63,6 +63,11 @@ void initializeMemoryRegion(uint8_t * memptr, uint32_t len){
 
 void * __malloc_pid(size_t size, struct MemoryHandle * mhandle);
 void * malloc_pid(size_t size, pid_t pid){
+  if(size < 4){
+    //size must be 4 or more
+    size = 4;
+  }
+
   uint32_t iter=0;
   struct MemoryHandle * mhand = getAllocatedMemory(pid,&iter);
 
@@ -93,7 +98,7 @@ void * __malloc_pid(size_t size, struct MemoryHandle * mhandle){
 
   //look for memory
   while(1){
-    if(BLOCK_LEN(*(uint32_t *)heapPtr) > size && !(*(uint32_t*)heapPtr & BLOCK_ALLOCATED)){
+    if(BLOCK_LEN(*(uint32_t *)heapPtr) > size && !(*(uint32_t*)heapPtr & BLOCK_ALLOCATED) && !(*(uint32_t*)heapPtr & BLOCK_DELETED)){
       //use this block
       uint8_t wasEnd = (*(uint32_t*)heapPtr & HEAP_END) >> 3;
       uint32_t oldSize = BLOCK_LEN(*(uint32_t *)heapPtr);
@@ -139,7 +144,7 @@ void * __malloc_pid(size_t size, struct MemoryHandle * mhandle){
         // go to next block
         heapPtr = heapPtr + BLOCK_LEN(*(uint32_t *)heapPtr) + HEAP_HEADER_SIZE;
       }
-      
+
       if(heapPtr == startPoint){
         //no space available
         return NULL;
@@ -179,6 +184,9 @@ void free(void * ptr){
         *(uint32_t*)ptr |= HEAP_END;
       }
 
+      //mark block that we merged with as deleted
+      *nextPtr |= BLOCK_DELETED;
+
       //update tail
       tailPtr = (uint32_t*)((uint8_t *)ptr + BLOCK_LEN(*(uint32_t *)ptr));
       *tailPtr = BLOCK_LEN(*(uint32_t *)ptr);
@@ -197,6 +205,9 @@ void free(void * ptr){
     if(*(uint32_t *)ptr & HEAP_END){
       *lastBlockPtr |= HEAP_END;
     }
+
+    //mark self as deleted
+    *(uint32_t*)ptr |= BLOCK_DELETED;
 
     //update tail
     tailPtr = (uint32_t*)((uint8_t *)lastBlockPtr + BLOCK_LEN(*lastBlockPtr));

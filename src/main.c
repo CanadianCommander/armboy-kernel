@@ -44,14 +44,6 @@ int main(void){
   loadDefaultMonitorHandlers();
   addMemoryDebugKernelMonitor();
 
-
-  //TMP TMP TMP
-  void * ptr = malloc_pid(256,KERNEL_PID);
-  while(ptr != NULL){
-    ptr = malloc_pid(256,KERNEL_PID);
-    printf("--- addr: %p \n", ptr);
-  }
-
   //sys info is always nice
   printSysInfo();
 
