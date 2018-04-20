@@ -6,7 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
-static kMonitorHandler monitorList[KERNEL_MONITOR_HANDLER_MAX];
+static struct kmHandle {
+  kMonitorHandler mon;
+  char * name;
+} kmHandle;
+
+static struct kmHandle monitorList[KERNEL_MONITOR_HANDLER_MAX];
 static uint32_t monitorListLen = 0;
 
 bool hasPending(){
@@ -18,7 +23,8 @@ bool hasPending(){
   }
 }
 
-void processBackspace(char * lineBuffer);
+static void processBackspace(char * lineBuffer);
+static bool __NameCheck(char * name, char * line);
 void servicePendingOperations(){
   char lineBuffer[KERNEL_MONITOR_LINE_BUFFER];
   memset(lineBuffer,0,KERNEL_MONITOR_LINE_BUFFER);
@@ -27,13 +33,27 @@ void servicePendingOperations(){
   processBackspace(lineBuffer);
 
   for(uint32_t i = 0; i < monitorListLen; i ++){
-    if((monitorList[i])(lineBuffer)){
-      //monitor just handled line
-      return;
+    if(monitorList[i].name == NULL || __NameCheck(monitorList[i].name, lineBuffer)){
+      if((monitorList[i].mon)(lineBuffer)){
+        //monitor just handled line
+        return;
+      }
     }
   }
 
   printf("\"%s\" Command Not Found\n",lineBuffer);
+}
+
+static bool __NameCheck(char * name, char * line){
+  char nbuff[128];
+  memset(nbuff,0,128);
+  sscanf(line, "%128s", nbuff);
+  if(strcmp(nbuff,name) == 0){
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 /**
@@ -41,7 +61,14 @@ void servicePendingOperations(){
   @param handler to add
 */
 void addMonitor(kMonitorHandler mon){
-  monitorList[monitorListLen] = mon;
+  monitorList[monitorListLen].mon = mon;
+  monitorList[monitorListLen].name = NULL;
+  monitorListLen ++;
+}
+
+void addMonitorWName(kMonitorHandler mon, char * name){
+  monitorList[monitorListLen].mon = mon;
+  monitorList[monitorListLen].name = name;
   monitorListLen ++;
 }
 
@@ -51,9 +78,9 @@ void addMonitor(kMonitorHandler mon){
 */
 void removeMonitor(kMonitorHandler mon){
   for(uint32_t i =0; i < monitorListLen; i ++){
-    if(monitorList[i] == mon){
+    if(monitorList[i].mon == mon){
       //remove
-      deletFromArray((uint8_t *)monitorList, i, 1, monitorListLen, sizeof(kMonitorHandler));
+      deletFromArray((uint8_t *)monitorList, i, 1, monitorListLen, sizeof(kmHandle));
       monitorListLen --;
       i --;
     }
@@ -112,7 +139,7 @@ bool memPoke(char * line){
   }
 }
 
-void processBackspace(char * lineBuffer){
+static void processBackspace(char * lineBuffer){
   for(int i = 0; i < KERNEL_MONITOR_LINE_BUFFER; i++){
     if(lineBuffer[i] == 0x0){
       break;

@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <sam3xa/include/sam3x8e.h>
+
 #include "config.h"
 #include "util/debug.h"
 #include "hardware/hardware.h"
 #include "kernelMonitor/kernelMonitor.h"
 #include "memoryManager/memoryManager.h"
+#include "flashManager/flashManager.h"
 #include "processManager/processManager.h"
 #pragma import(__use_no_heap)
 
@@ -43,6 +45,7 @@ int main(void){
   //load monitor handlers
   loadDefaultMonitorHandlers();
   addMemoryDebugKernelMonitor();
+  addFlashKernelMonitorFunctions();
 
   //sys info is always nice
   printSysInfo();

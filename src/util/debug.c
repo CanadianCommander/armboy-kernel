@@ -45,7 +45,12 @@ void dumpHex(uint8_t * hexBuffer, uint16_t len){
   for(uint16_t i =0; i < len; i ++){
     if((i % DUMP_BYTES_PER_LINE) == 0){
       if(i - DUMP_BYTES_PER_LINE >= 0){
-        printf(" | %.10s \n%.4x : %.2x",hexBuffer + i - DUMP_BYTES_PER_LINE,&(hexBuffer[i]),hexBuffer[i]);
+        printf(" | ");
+        for(int z=0; z < DUMP_BYTES_PER_LINE; z++){
+          printf("%c",*(hexBuffer + i - DUMP_BYTES_PER_LINE + z));
+        }
+        printf("\n");
+        printf("%.4x : %.2x",&(hexBuffer[i]),hexBuffer[i]);
       }
       else{
         printf("\n%.4x : %.2x",&(hexBuffer[i]),hexBuffer[i]);

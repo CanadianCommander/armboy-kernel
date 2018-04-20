@@ -21,7 +21,7 @@
 typedef bool (* kMonitorHandler) (char *);
 
 /**
-  load some default / standard kernel monitor handler functions 
+  load some default / standard kernel monitor handler functions
 */
 void loadDefaultMonitorHandlers(void);
 
@@ -39,9 +39,17 @@ void servicePendingOperations();
 
 /**
   add kernel monitor handler
-  @param handler to add
+  @param mon handler to add
 */
 void addMonitor(kMonitorHandler mon);
+
+/**
+  like addMonitor but the mon function is wraped in a name checking function.
+  that is, the user must type: <name> bla bla bla to invoke mon.
+  @param mon handler to add
+  @param name the name the user must type to invoke the command
+*/
+void addMonitorWName(kMonitorHandler mon, char * name);
 
 /**
   remove kernel monitor handler
