@@ -35,10 +35,46 @@ void writeNextPage( struct PageAllocationStruct * pas, uint8_t * pageData){
   }
 }
 
+void parseFlashHeader(uint32_t page, struct FlashHeader * header){
+  uint8_t headerBuffer[FLASH_PAGE_SIZE];
+  if(readPageAuto(page,headerBuffer)){
+    memcpy(header->modName,headerBuffer,60);
+
+    uint32_t * hptr = (uint32_t *)(headerBuffer + 60);
+    header->id = *hptr++;
+    header->text_start = *hptr++;
+    header->text_end = *hptr++;
+    header->got_start = *hptr++;
+    header->got_end = *hptr++;
+    header->data_start = *hptr++;
+    header->data_end = *hptr++;
+    header->bss_start = *hptr++;
+    header->bss_end = *hptr++;
+    header->reqHeapSize = *hptr++;
+    header->firstJumpVector = (uint32_t*)*hptr;
+  }
+}
+
 void clearAllocationPage(){
   uint8_t allocationPage[FLASH_PAGE_SIZE];
   memset(allocationPage, 0, FLASH_PAGE_SIZE);
   writePageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+}
+
+uint32_t locateModule(uint32_t id){
+  uint8_t allocationPage[FLASH_PAGE_SIZE];
+  if(readPageAuto(PAGE_ALLOCATION_PAGE, allocationPage)){
+    for(uint32_t i = 0; i <= FLASH_LEN/2; i++){
+      if(getBit(i,allocationPage)){
+        struct FlashHeader fh;
+        parseFlashHeader(i + FLASH_LEN/2, &fh);
+        if(fh.id == id){
+          return i + FLASH_LEN/2;
+        }
+      }
+    }
+  }
+  return 0;
 }
 
 static uint32_t __allocateFlash(uint32_t nPages){
@@ -74,7 +110,6 @@ static uint32_t __allocateFlash(uint32_t nPages){
   }
 
 }
-
 
 bool kmUpload(char * line);
 bool kmDelete(char * line);
@@ -163,5 +198,34 @@ bool kmDelete(char * line){
 }
 
 bool kmlsFlash(char * line){
-  return false;
+  printf("---- programs in flash -----\n");
+  uint8_t allocationPage[FLASH_PAGE_SIZE];
+  if(readPageAuto(PAGE_ALLOCATION_PAGE, allocationPage)){
+    for(uint32_t i = 0; i <= FLASH_LEN/2; i++){
+      if(getBit(i,allocationPage)){
+        struct FlashHeader fh;
+        parseFlashHeader(i+FLASH_LEN/2,&fh);
+        printf("------------------\n");
+        printf("name: %.60s\n", fh.modName);
+        printf("id:   %.8x\n", fh.id);
+        printf("text start: %.8x\n", fh.text_start);
+        printf("text end:   %.8x\n", fh.text_end);
+        printf("got start:  %.8x\n", fh.got_start);
+        printf("got end:    %.8x\n", fh.got_end);
+        printf("data start: %.8x\n", fh.data_start);
+        printf("data end:   %.8x\n", fh.data_end);
+        printf("bss start:  %.8x\n", fh.bss_start);
+        printf("bss end:    %.8x\n", fh.bss_end);
+        printf("requested heap size: %.8x\n", fh.reqHeapSize);
+        printf("first jump vector: %p\n", fh.firstJumpVector);
+        printf("------------------\n");
+      }
+    }
+  }
+  else {
+    printf("ERROR reading allocation page");
+  }
+
+  printf("###############################\n");
+  return true;
 }

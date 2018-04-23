@@ -18,6 +18,27 @@ struct PageAllocationStruct {
 } PageAllocationStruct;
 
 /**
+  holds information about a program stored in flash. used by loader.
+*/
+struct FlashHeader {
+  char modName[60];
+  uint32_t id;
+
+  uint32_t text_start;
+  uint32_t text_end;
+  uint32_t got_start;
+  uint32_t got_end;
+  uint32_t data_start;
+  uint32_t data_end;
+  uint32_t bss_start;
+  uint32_t bss_end;
+
+  uint32_t reqHeapSize;
+
+  void * firstJumpVector;
+} FlashHeader;
+
+/**
   start the process of writing a binary to flash.
   @param pas a empty structure used to keep track of the flash write operation
   @param headerPage a buffer of page size (FLASH_PAGE_SIZE bytes) containing header data.
@@ -34,6 +55,18 @@ void writeBinaryToFlash(struct PageAllocationStruct * pas, uint8_t * headerPage,
   @see writeBinaryToFlash
 */
 void writeNextPage(struct PageAllocationStruct * pas, uint8_t * pageData);
+
+/**
+  reads the flash header at page, parses it and stores it in header
+  @param page the page the contains the header data
+  @param header the structure to fill out with the data
+*/
+void parseFlashHeader(uint32_t page, struct FlashHeader * header);
+
+/**
+  return the page number of the module with id, id. zero if not found
+*/
+uint32_t locateModule(uint32_t id);
 
 /**
   zero out allocation page. i.e. deallocate all blocks
