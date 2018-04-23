@@ -58,7 +58,7 @@ static uint32_t __allocateFlash(uint32_t nPages){
           }
           //write changes to flash
           writePageAuto(PAGE_ALLOCATION_PAGE, allocationPage);
-          return pos;
+          return pos - (freeCount - 1);
         }
       }
       else {
@@ -86,8 +86,10 @@ void addFlashKernelMonitorFunctions(void){
 
 bool kmUpload(char * line){
   uint32_t nPages = 0;
-  sscanf(line, "%*s %d",&nPages);
-  if(nPages){
+  uint32_t myChecksum = 0;
+  sscanf(line, "%*s %d %u",&nPages, &myChecksum);
+  if(nPages && myChecksum){
+    myChecksum = ~myChecksum + 1;
     uint8_t buffer[FLASH_PAGE_SIZE];
     struct PageAllocationStruct pas;
     memset(&pas,0,sizeof(PageAllocationStruct));
@@ -97,13 +99,20 @@ bool kmUpload(char * line){
       printf("next\n");
 
       //block waiting for uart line rdy
-      while(!lineReadyUart()){
+      while(getRxBufferLenUart() < (FLASH_PAGE_SIZE/4)){
         asm("");
       }
 
-      getNextLineUart(buffer + (FLASH_PAGE_SIZE/4)*((i - 1) % 4), FLASH_PAGE_SIZE/4);
+      uint32_t nBytesRead = readDirectUART(buffer + (FLASH_PAGE_SIZE/4)*((i - 1) % 4), FLASH_PAGE_SIZE/4);
+
+      if(nBytesRead != (FLASH_PAGE_SIZE/4)){
+        printf("ERROR, binary data read error\n");
+        return true;
+      }
 
       if(i % 4 == 0){
+        myChecksum = evalChecksum((uint32_t*)buffer,FLASH_PAGE_SIZE/4,myChecksum);
+
         if(i == 4){
           //header
           writeBinaryToFlash(&pas,buffer,nPages);
@@ -120,9 +129,16 @@ bool kmUpload(char * line){
         }
       }
     }
+
+    if(myChecksum == 0){
+      printf("done\n");
+    }
+    else {
+      printf("ERROR, checksum error! %u\n", myChecksum);
+    }
   }
   else {
-    printf("bad arguments for upload. usage: upload <pageCount>\n");
+    printf("bad arguments for upload. usage: upload <pageCount> <checksum>\n");
   }
 
   return true;

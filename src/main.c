@@ -47,10 +47,7 @@ int main(void){
   addMemoryDebugKernelMonitor();
   addFlashKernelMonitorFunctions();
 
-  //sys info is always nice
-  printSysInfo();
-
-  printf("=== ARM Boy ===\n");
+  printf("===ARMBoy===\n");
   while(1){
     if(hasPending()){
       servicePendingOperations();

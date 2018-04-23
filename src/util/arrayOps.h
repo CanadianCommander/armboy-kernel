@@ -32,4 +32,13 @@ uint8_t getBit(uint32_t pos,uint8_t * buffer);
 */
 void setBit(uint32_t bitPos, uint8_t value, uint8_t * buffer);
 
+/**
+  checks the given checksum against the given array and returns the result. zero means checksum match.
+  @param array the array of data to check. must be word aligned
+  @param len the length of the array in words (4 bytes)
+  @param checksum the checksum for the data
+  @return array checksum
+*/
+uint32_t evalChecksum(uint32_t * array, uint32_t len, uint32_t checksum);
+
 #endif /*arrayOps_H_*/

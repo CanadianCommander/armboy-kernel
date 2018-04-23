@@ -21,3 +21,11 @@ void setBit(uint32_t bitPos, uint8_t value, uint8_t * buffer){
   uint32_t bytes = bitPos / 8;
   buffer[bytes] = (buffer[bytes] & ~(1 << -(bitPos - (bytes*8 + 7)))) | ((0x1 & value) << -(bitPos - (bytes*8 + 7)));
 }
+
+uint32_t evalChecksum(uint32_t * array, uint32_t len, uint32_t checksum){
+  uint32_t checkResult = checksum;
+  for(int i = 0; i < len; i ++){
+    checkResult = checkResult + *(array + i);
+  }
+  return checkResult;
+}
