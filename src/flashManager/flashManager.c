@@ -56,6 +56,8 @@ static uint32_t __allocateFlash(uint32_t nPages){
           for(uint32_t i=(pos - (freeCount-1)); i <= pos; i++){
             setBit(i,1,allocationPage);
           }
+          //set start of block bit
+          setBit((pos - (freeCount - 1)) - FLASH_LEN/2, 1, allocationPage);
           //write changes to flash
           writePageAuto(PAGE_ALLOCATION_PAGE, allocationPage);
           return pos - (freeCount - 1);
