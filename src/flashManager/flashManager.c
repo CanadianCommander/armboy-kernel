@@ -37,6 +37,7 @@ void writeNextPage( struct PageAllocationStruct * pas, uint8_t * pageData){
 
 void parseFlashHeader(uint32_t page, struct FlashHeader * header){
   uint8_t headerBuffer[FLASH_PAGE_SIZE];
+  uint32_t pageAddr = (uint32_t)getFlashStartAddress(0) + page*FLASH_PAGE_SIZE;
   if(readPageAuto(page,headerBuffer)){
     memcpy(header->modName,headerBuffer,60);
 
@@ -51,7 +52,7 @@ void parseFlashHeader(uint32_t page, struct FlashHeader * header){
     header->bss_start = *hptr++;
     header->bss_end = *hptr++;
     header->reqHeapSize = *hptr++;
-    header->firstJumpVector = (uint32_t*)*hptr;
+    header->jumpTableStart = (void*)(pageAddr + ((uint32_t)hptr - (uint32_t)headerBuffer));
   }
 }
 
@@ -217,7 +218,7 @@ bool kmlsFlash(char * line){
         printf("bss start:  %.8x\n", fh.bss_start);
         printf("bss end:    %.8x\n", fh.bss_end);
         printf("requested heap size: %.8x\n", fh.reqHeapSize);
-        printf("first jump vector: %p\n", fh.firstJumpVector);
+        printf("jump table start: %p\n", fh.jumpTableStart);
         printf("------------------\n");
       }
     }

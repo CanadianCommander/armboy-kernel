@@ -46,6 +46,7 @@ int main(void){
   loadDefaultMonitorHandlers();
   addMemoryDebugKernelMonitor();
   addFlashKernelMonitorFunctions();
+  addProgManagerKernelMonitorFunctions();
 
   printf("===ARMBoy===\n");
   while(1){

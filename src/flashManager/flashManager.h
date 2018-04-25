@@ -9,7 +9,7 @@
 /**
   the PAGE_ALLOCATION_PAGE is a flash page (FLASH_PAGE_SIZE bytes). it contains bit field page indicating what pages are allocated
 */
-#define PAGE_ALLOCATION_PAGE 1025
+#define PAGE_ALLOCATION_PAGE 1024
 
 struct PageAllocationStruct {
   uint32_t startPage;
@@ -35,7 +35,7 @@ struct FlashHeader {
 
   uint32_t reqHeapSize;
 
-  void * firstJumpVector;
+  void * jumpTableStart;
 } FlashHeader;
 
 /**

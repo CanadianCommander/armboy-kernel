@@ -6,7 +6,7 @@
 #define MEMORY_MANAGER_H_
 #include <stdio.h>
 
-#define MEMORY_CHUNK_MAX 128
+#define MEMORY_CHUNK_MAX 64
 
 struct MemoryHandle {
   pid_t owner;

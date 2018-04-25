@@ -1,10 +1,10 @@
 OBYCP = arm-none-eabi-objcopy
 CC = arm-none-eabi-gcc
-CFLAGS = --std=gnu11 -Os -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.specs --specs=nano.specs -ffreestanding -Tgcc.ld -Wl,--entry=main
+CFLAGS = --std=gnu11 -O0 -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.specs --specs=nano.specs -ffreestanding -Tgcc.ld -Wl,--entry=main
 INCLD = -I ../../../tools/ATMEL/ -I ../../../tools/CMSIS/include
 TARGET ?= sam3x8e # target board
 
-SRC_CC = *.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c startup_ARMCM3.S hardware/api.a
+SRC_CC = *.c processManager/*.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c startup_ARMCM3.S hardware/api.a
 SRC_O = *.o
 
 kernel.bin : kernel.elf
