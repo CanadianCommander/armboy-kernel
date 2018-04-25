@@ -18,6 +18,11 @@ static pid_t __getNewPid(struct ProcessDescriptor *pd){
   return 0;
 }
 
+static void __freePid(struct ProcessDescriptor * pd){
+  pd->pid = BAD_PID;
+  pd->proc_state = PROCS_DEAD;
+}
+
 #define FUNCTION_BASE_ADDR 0x80000
 static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_t * srcAddr){
   uint8_t * data = srcAddr + fh->data_start;
@@ -31,7 +36,6 @@ static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_
   memcpy(targetAddr, got, glen);
   memcpy(targetAddr + glen, data, dlen);
   memcpy(targetAddr + dlen + glen, bss, blen);
-  dumpHex(got,glen);
 
   //update got table
   uint32_t * wGot = (uint32_t *)(targetAddr);
@@ -103,11 +107,43 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
   return freepd;
 }
 
+bool unloadProcess(struct ProcessDescriptor * pd){
+  if(pd){
+    //free process memory
+    uint32_t iter = 0;
+    struct MemoryHandle * mh;
+    mh = getAllocatedMemory(pd->pid,&iter);
+    while(mh != NULL){
+      releaseMemory(mh);
+      mh = getAllocatedMemory(pd->pid,&iter);
+    }
+
+    __freePid(pd);
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool unloadProcessPid(pid_t pid){
+  struct ProcessDescriptor * pd = findProcessDescriptor(pid);
+  return unloadProcess(pd);
+}
+
+bool unloadProcessCid(uint32_t cid){
+  struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
+  return unloadProcess(pd);
+}
 
 static bool insmod(char * line);
+static bool rmmod(char * line);
+static bool lsmod(char * line);
 static bool call(char * line);
 void addProgManagerKernelMonitorFunctions(void){
   addMonitorWName(insmod,"insmod");
+  addMonitorWName(rmmod, "rmmod");
+  addMonitorWName(lsmod, "lsmod");
   addMonitorWName(call, "call");
 }
 
@@ -159,5 +195,56 @@ static bool call(char * line){
   else {
     printf("Error, usage: call <module id> <jump vector>\n");
   }
+  return true;
+}
+
+static bool rmmod(char * line){
+  uint32_t cid = 0;
+  sscanf(line, "%*s %x", &cid);
+  if(cid){
+    if(unloadProcessCid(cid)){
+      printf("moudle unloaded!\n");
+    }
+    else {
+      printf("could not unload module!\n");
+    }
+  }
+  else {
+    printf("bad arguments, usage: rmmod <module id>\n");
+  }
+  return true;
+}
+
+static bool lsmod(char * line){
+  printf("----- kernel modules ------\n");
+  for(int i =0; i < MAX_PROCESS; i ++){
+    if(pdList[i].pid != BAD_PID && pdList[i].proc_type == PROC_TYPE_KMOD){
+      struct FlashHeader fh;
+      parseFlashHeader(locateModule(pdList[i].cid), &fh);
+
+      printf("--- module: %.60s\n", fh.modName);
+      printf("pid: %x\n", pdList[i].pid);
+      printf("module id: %x\n", pdList[i].cid);
+      printf("state: ");
+      switch(pdList[i].proc_state){
+        case PROCS_DEAD:
+          printf("DEAD\n");
+          break;
+        case PROCS_READY:
+          printf("READY\n");
+          break;
+        case PROCS_BLOCK:
+          printf("BLOCKED\n");
+          break;
+        case PROCS_RUNNING:
+          printf("RUNNING\n");
+          break;
+        default:
+          printf("UNKNOWN\n");
+          break;
+      }
+    }
+  }
+  printf("#########################\n");
   return true;
 }

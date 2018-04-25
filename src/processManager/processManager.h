@@ -60,6 +60,26 @@ struct ProcessDescriptor * findProcessDescriptorCid(uint32_t cid);
 */
 struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t proc_type);
 
+
+/**
+  unload the process described by process descriptor pd
+  @param pd the descriptor of the process to be unloaded
+  @return true if unloaded false otherwise
+*/
+bool unloadProcess(struct ProcessDescriptor * pd);
+
+/**
+  unload the prcoess with pid (free all resources).
+  @param pid the process id of the process to unload
+  @return true if module unloaded false if not.
+*/
+bool unloadProcessPid(pid_t pid);
+
+/**
+  like unloadProcess but is based on cid instead of pid.
+  @see unloadProcessPid
+*/
+bool unloadProcessCid(uint32_t cid);
 /**
   add flash manager kernel monitor functions
 */
