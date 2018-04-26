@@ -8,6 +8,8 @@
 #include "../util/arrayOps.h"
 #include "../util/debug.h"
 #include "../kernelMonitor/kernelMonitor.h"
+#include "../memoryManager/memoryManager.h"
+#include "../processManager/processManager.h"
 
 // find a free flash location of the specified size. allocate and return its page number
 static uint32_t __allocateFlash(uint32_t nPages);
@@ -112,15 +114,67 @@ static uint32_t __allocateFlash(uint32_t nPages){
 
 }
 
+bool kmUploadUser(char * line);
 bool kmUpload(char * line);
 bool kmDelete(char * line);
 bool kmlsFlash(char * line);
 void addFlashKernelMonitorFunctions(void){
+  addMonitorWName(kmUploadUser, "u_upload");
   addMonitorWName(kmUpload, "upload");
   addMonitorWName(kmDelete, "delete");
   addMonitorWName(kmlsFlash, "lsf");
 }
 
+#define UPLOAD_USER_CHUNK_SIZE 64
+bool kmUploadUser(char * line){
+  uint32_t binLen = 0;
+  uint32_t hLen = 0;
+  uint32_t sLen = 0;
+  uint32_t checksum = 0;
+  sscanf(line, "%*s %d %d %d %u", &binLen, &hLen, &sLen, &checksum);
+  if(binLen && binLen % UPLOAD_USER_CHUNK_SIZE == 0 && hLen && sLen && checksum){
+    struct MemoryHandle * mh = requestMemory(binLen + hLen + sLen, binLen, KERNEL_PID);
+    if(mh){
+      uint8_t * mPtr = mh->memptr;
+      uint8_t buffer[UPLOAD_USER_CHUNK_SIZE];
+      checksum = ~checksum + 1;
+
+      for(uint32_t i = 0; i < binLen; i += UPLOAD_USER_CHUNK_SIZE){
+        printf("next\n");
+
+        //block waiting for 64 bytes on uart
+        while(getRxBufferLenUart() < UPLOAD_USER_CHUNK_SIZE){
+          asm("");
+        }
+        uint32_t nBytesRead = readDirectUART(buffer, UPLOAD_USER_CHUNK_SIZE);
+
+        if(nBytesRead != UPLOAD_USER_CHUNK_SIZE){
+          printf("ERROR, uart read error!\n");
+          return true;
+        }
+
+        checksum = evalChecksum((uint32_t*)buffer,UPLOAD_USER_CHUNK_SIZE/4,checksum);
+        memcpy(mPtr, buffer, UPLOAD_USER_CHUNK_SIZE);
+        mPtr = mPtr + UPLOAD_USER_CHUNK_SIZE;
+      }
+
+      if(checksum != 0){
+        printf("ERROR, checksum error %x\n", checksum);
+      }
+      else {
+        printf("done\n");
+      }
+    }
+    else {
+      printf("ERROR, could not allocate the requested %d bytes\n", binLen + hLen + sLen);
+    }
+  }
+  else {
+    printf("ERROR, usage: u_upload <binary length (multiple of %d bytes)> <heap size> <stack size> <checksum>\n", UPLOAD_USER_CHUNK_SIZE);
+  }
+
+  return true;
+}
 
 bool kmUpload(char * line){
   uint32_t nPages = 0;

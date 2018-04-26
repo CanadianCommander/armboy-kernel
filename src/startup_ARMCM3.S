@@ -80,7 +80,7 @@ __isr_vector:
 	.long	0                     /* Reserved */
 	.long	0                     /* Reserved */
 	.long	0                     /* Reserved */
-	.long	defaultVector           /* SVCall Handler */
+	.long	SVC_IRQ           /* SVCall Handler */
 	.long	defaultVector      /* Debug Monitor Handler */
 	.long	0                     /* Reserved */
 	.long	defaultVector        /* PendSV Handler */

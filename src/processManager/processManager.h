@@ -80,6 +80,13 @@ bool unloadProcessPid(pid_t pid);
   @see unloadProcessPid
 */
 bool unloadProcessCid(uint32_t cid);
+
+/**
+  return the pid of the next ready process in a RR fashion. NOTE only PROC_TYPE_USER
+  process can be returned here.
+*/
+struct ProcessDescriptor * getNextReadyProcess();
+
 /**
   add flash manager kernel monitor functions
 */

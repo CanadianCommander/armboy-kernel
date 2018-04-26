@@ -34,6 +34,11 @@ void releaseMemory(struct MemoryHandle * memH){
   free(memH->memptr);
 }
 
+void transferMemory(struct MemoryHandle * memH, pid_t newOwner){
+  memH->owner = newOwner;
+}
+
+
 void allocateKernelMemory(uint8_t * startAddr, uint32_t size){
   //give memory handle zero to the kernel... told you this was dangerous
   memoryHandles[0].owner = KERNEL_PID;

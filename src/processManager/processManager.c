@@ -20,6 +20,7 @@ static pid_t __getNewPid(struct ProcessDescriptor *pd){
 
 static void __freePid(struct ProcessDescriptor * pd){
   pd->pid = BAD_PID;
+  pd->cid = 0;
   pd->proc_state = PROCS_DEAD;
 }
 
@@ -96,7 +97,9 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
       }
     }
     else {
-
+      freepd->staticBase = 0;
+      freepd->cid = 0;
+      freepd->jumpTableStart = binaryStartPtr;
     }
   }
   else {
@@ -135,6 +138,20 @@ bool unloadProcessCid(uint32_t cid){
   struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
   return unloadProcess(pd);
 }
+
+static volatile uint32_t getNextReadyProcess_i = 0;
+struct ProcessDescriptor * getNextReadyProcess(){
+  uint32_t old = getNextReadyProcess_i;
+  for(int i =0; i < 2; i ++){
+    for(getNextReadyProcess_i = getNextReadyProcess_i*(1 - i); getNextReadyProcess_i < ((MAX_PROCESS*(1-i)) + old*i) ; getNextReadyProcess_i++){
+      if(pdList[i].pid != BAD_PID && pdList[i].proc_type == PROC_TYPE_USER && pdList[i].proc_state == PROCS_READY){
+        return pdList + i;
+      }
+    }
+  }
+  return NULL;
+}
+
 
 static bool insmod(char * line);
 static bool rmmod(char * line);
@@ -177,7 +194,7 @@ static bool call(char * line){
   sscanf(line, "%*s %x %d",&cid,&jv);
   if(cid && jv != -1){
     struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
-    if(1){
+    if(pd){
       uint32_t jump = (*((uint32_t*)pd->jumpTableStart + jv) + (uint32_t)pd->binaryAddress);
       asm(
         "mov r9, %[staticB] \n"
@@ -189,7 +206,7 @@ static bool call(char * line){
       );
     }
     else{
-      printf("Error, could not find process with module id %x did you load it?", cid);
+      printf("Error, could not find process with module id %x did you load it?\n", cid);
     }
   }
   else {

@@ -42,6 +42,12 @@ struct MemoryHandle * requestMemory(uint32_t size, uint32_t heapStart, pid_t own
 */
 void releaseMemory(struct MemoryHandle * memH);
 
+
+/**
+  assign memory to the new owner
+*/
+void transferMemory(struct MemoryHandle * memH, pid_t newOwner);
+
 /**
   force allocate memory region defined by startAddr and size to the kernel.
   VERY UNSAFE ONLY USE AT START UP.
