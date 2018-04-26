@@ -4,6 +4,7 @@ around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the o
 
 ### related repos
 - [sam3x8e hardware api](https://github.com/CanadianCommander/sam3x8eHardwareAPI)
+- [ArmBoy Flasher tool](https://github.com/CanadianCommander/ARMBoyFlasher)
 
 ## documentation  
 kernel documentation can be found in the github wiki (have to you know write the kernel before I can
