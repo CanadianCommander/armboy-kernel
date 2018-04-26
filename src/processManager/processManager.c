@@ -99,7 +99,14 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
     else {
       freepd->staticBase = 0;
       freepd->cid = 0;
-      freepd->jumpTableStart = binaryStartPtr;
+
+      //code is half word aligned
+      if((uint32_t)binaryStartPtr % 2 != 0){
+        freepd->jumpTableStart = (uint8_t*)binaryStartPtr + 1;
+      }
+      else {
+        freepd->jumpTableStart = binaryStartPtr;
+      }
     }
   }
   else {
@@ -157,11 +164,13 @@ static bool insmod(char * line);
 static bool rmmod(char * line);
 static bool lsmod(char * line);
 static bool call(char * line);
+static bool jump(char * line);
 void addProgManagerKernelMonitorFunctions(void){
   addMonitorWName(insmod,"insmod");
   addMonitorWName(rmmod, "rmmod");
   addMonitorWName(lsmod, "lsmod");
   addMonitorWName(call, "call");
+  addMonitorWName(jump, "jump");
 }
 
 static bool insmod(char * line){
@@ -196,6 +205,7 @@ static bool call(char * line){
     struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
     if(pd){
       uint32_t jump = (*((uint32_t*)pd->jumpTableStart + jv) + (uint32_t)pd->binaryAddress);
+      printf("jumping to %x\n", jump);
       asm(
         "mov r9, %[staticB] \n"
         "blx %[jumpAddr] "
@@ -263,5 +273,23 @@ static bool lsmod(char * line){
     }
   }
   printf("#########################\n");
+  return true;
+}
+
+static bool jump(char * line){
+  uint32_t jumpAddr = 0;
+  sscanf(line, "%*s %x", &jumpAddr);
+  if(jumpAddr){
+    printf("jumping to %x\n", jumpAddr);
+    asm(
+      "blx %[jumpAddr] "
+      :
+      : [jumpAddr] "r" (jumpAddr)
+      : "r0", "r1", "r2", "r3", "pc", "sp", "lr", "memory"
+    );
+  }
+  else{
+    printf("ERROR, usage: jump <address>\n");
+  }
   return true;
 }

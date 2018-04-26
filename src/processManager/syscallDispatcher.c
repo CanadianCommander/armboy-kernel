@@ -5,7 +5,7 @@ __attribute__ ((naked)) void SVC_IRQ(void){
   asm(
   "mrs r0, MSP \n"
   "b SVC_IRQ_main \n"
-  "mov r0, 0xFFFFFFFD \n" // return from interrupt and switch stack to process stack (PSP)
+  "mov r0, 0xFFFFFFFF \n" // return from interrupt and switch stack to process stack (PSP)
   "bx r0"
   :
   :
@@ -53,3 +53,4 @@ void doModuleCall(uint32_t cid, uint8_t jVec, uint32_t arg){
     );
   }
 }
+//00080a0c
