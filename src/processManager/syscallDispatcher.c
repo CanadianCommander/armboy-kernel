@@ -3,10 +3,11 @@
 
 __attribute__ ((naked)) void SVC_IRQ(void){
   asm(
-  "mrs r0, MSP \n"
-  "b SVC_IRQ_main \n"
-  "mov r0, 0xFFFFFFFF \n" // return from interrupt and switch stack to process stack (PSP)
-  "bx r0"
+  "push {lr} \n"
+  "mrs r0, PSP \n"
+  "bl SVC_IRQ_main \n"
+  "pop {lr} \n"
+  "bx lr\n"
   :
   :
   :
@@ -27,7 +28,7 @@ void SVC_IRQ_main(unsigned int * svc_args){
     case SYS_CALL_MOD:
       //r0 contains cid in the high half word and the jVec in the low half word
       //r1 contains arg
-      doModuleCall((0xFF00 & svc_args[0]) >> 16, (0x00FF & svc_args[0]), svc_args[1]);
+      doModuleCall((0xFFFF0000 & (svc_args[0])) >> 16, (0x0000FFFF & (svc_args[0])), svc_args[1]);
       break;
     default:
       break;

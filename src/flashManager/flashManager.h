@@ -5,6 +5,7 @@
 #ifndef FLASH_MANAGER_H_
 #define FLASH_MANAGER_H_
 #include <stdint.h>
+#include <stdbool.h>
 
 /**
   the PAGE_ALLOCATION_PAGE is a flash page (FLASH_PAGE_SIZE bytes). it contains bit field page indicating what pages are allocated
@@ -69,9 +70,26 @@ void parseFlashHeader(uint32_t page, struct FlashHeader * header);
 uint32_t locateModule(uint32_t id);
 
 /**
+  delete module with from flash
+  @param id the id of the module to delete
+  @return true if found and deleted else false.
+*/
+bool deleteModule(uint32_t id);
+
+/**
   zero out allocation page. i.e. deallocate all blocks
 */
 void clearAllocationPage();
+
+/**
+  set bit in allocation page.
+*/
+void setBitAllocationPage(uint16_t pos,uint8_t bit);
+
+/**
+  like setBitAllocationPage but sets the bit accross a given range
+*/
+void setBitRangeAllocationPage(uint16_t posStart, uint16_t posEnd,uint8_t bit);
 
 /**
   add flash manager kernel monitor functions

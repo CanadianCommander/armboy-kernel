@@ -3,11 +3,15 @@
 #include "../memoryManager/memoryManager.h"
 #include "../kernelMonitor/kernelMonitor.h"
 #include "../config.h"
+#include "../util/misc.h"
 #include "../util/debug.h"
 #include "../hardware/hardware.h"
+#include "systickHandler.h"
 #include <memory.h>
 
 static struct ProcessDescriptor pdList[MAX_PROCESS];
+
+volatile struct ProcessDescriptor * currentPd = NULL;
 
 static pid_t __getNewPid(struct ProcessDescriptor *pd){
   for(int i =0; i < MAX_PROCESS; i ++){
@@ -59,7 +63,7 @@ struct ProcessDescriptor * findProcessDescriptor(pid_t pid){
 
 struct ProcessDescriptor * findProcessDescriptorCid(uint32_t cid){
   for(int i =0; i < MAX_PROCESS; i ++){
-    if(pdList[i].cid == cid){
+    if(pdList[i].cid == cid && pdList[i].pid != BAD_PID){
       return pdList + i;
     }
   }
@@ -69,14 +73,16 @@ struct ProcessDescriptor * findProcessDescriptorCid(uint32_t cid){
 
 struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t proc_type){
   struct ProcessDescriptor * freepd = findProcessDescriptor(BAD_PID);
-  freepd->pid = __getNewPid(freepd);
-  freepd->proc_type = proc_type;
-  freepd->block_code = 0;
-  freepd->cid = 0;
-  freepd->staticBase = 0;
-  freepd->binaryAddress = binaryStartPtr;
 
   if(freepd){
+    freepd->pid = __getNewPid(freepd);
+    freepd->proc_type = proc_type;
+    freepd->block_code = 0;
+    freepd->cid = 0;
+    freepd->staticBase = 0;
+    freepd->binaryAddress = binaryStartPtr;
+    freepd->stackPtr = NULL;
+
     if(flash){
       int page = addressToFlashPage(binaryStartPtr);
       if(page != -1){
@@ -108,13 +114,13 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
         freepd->jumpTableStart = binaryStartPtr;
       }
     }
+
+    freepd->proc_state = PROCS_READY;
+    return freepd;
   }
   else {
     return NULL;
   }
-
-  freepd->proc_state = PROCS_READY;
-  return freepd;
 }
 
 bool unloadProcess(struct ProcessDescriptor * pd){
@@ -157,6 +163,72 @@ struct ProcessDescriptor * getNextReadyProcess(){
     }
   }
   return NULL;
+}
+
+static uint32_t* initializeStack(uint32_t * sPtr, void * bin, void * jmp);
+void runProcess(volatile struct ProcessDescriptor * pd){
+  if(pd->stackPtr){
+    //resume
+    launchProcess(pd->stackPtr);
+  }
+  else {
+    //start for first time.
+    //allocate stack
+    uint32_t iter = 0;
+    struct MemoryHandle * mh = getAllocatedMemory(pd->pid, &iter);
+    if(mh){
+      pd->stackPtr = alignPtr((void*)(mh->memptr + mh->len - 4), WORD);
+      pd->stackPtr = initializeStack(pd->stackPtr,pd->binaryAddress,pd->jumpTableStart);
+      runProcess(pd);
+    }
+  }
+}
+
+#define INITIAL_STATUS_REG 0x01000000 // all default / zero. W/ inturrupt bit set to SysTick inturrupt.
+static uint32_t* initializeStack(uint32_t * sPtr, void * binAddr, void * jumpAddr){
+  *sPtr = INITIAL_STATUS_REG;
+  sPtr--;
+  if((uint32_t)binAddr % 2 != 0){
+    *sPtr = (uint32_t)binAddr + *(uint32_t*)jumpAddr;//pc
+    sPtr--;
+    *sPtr = 0x0;//lr
+  }
+  else {
+    //fix me
+    *sPtr = (uint32_t)binAddr + 1 + *(uint32_t*)jumpAddr;//pc
+    sPtr--;
+    *sPtr = 0x0;//lr
+  }
+
+  //r0 - r3 + r12 all zero
+  memset(sPtr - 5,0,5*4);
+  sPtr = sPtr - 5;
+
+  //r4 - r11 all zero
+  memset(sPtr - 8,0,8*4);
+  sPtr = sPtr - 8;
+
+  /****** Stack ********//*
+  xPSR
+  PC
+  LR
+  R12
+  R3
+  R2
+  R1
+  R0
+  --- custom below. HW stack above
+  R11
+  R10
+  R9
+  R8
+  R7
+  R6
+  R5
+  R4
+  *//********************/
+
+  return sPtr;
 }
 
 

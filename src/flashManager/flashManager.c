@@ -14,6 +14,18 @@
 // find a free flash location of the specified size. allocate and return its page number
 static uint32_t __allocateFlash(uint32_t nPages);
 
+//return the page number of the next allocated block after "start"
+static uint32_t getNextAllocatedPage(uint32_t start){
+  uint8_t allocationPage[FLASH_PAGE_SIZE];
+  readPageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+  for(int i = (start - FLASH_LEN/2 + 1); i < FLASH_LEN/2; i++){
+    if(getBit(i,allocationPage)){
+      return i + FLASH_LEN/2;
+    }
+  }
+  return FLASH_LEN - 1;
+}
+
 void writeBinaryToFlash( struct PageAllocationStruct * pas, uint8_t * headerPage,uint32_t countPages){
   uint32_t startPage = __allocateFlash(countPages);
   if(startPage){
@@ -64,6 +76,26 @@ void clearAllocationPage(){
   writePageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
 }
 
+void setBitAllocationPage(uint16_t pos,uint8_t bit){
+  if(bit == 0 || bit == 1){
+    uint8_t allocationPage[FLASH_PAGE_SIZE];
+    readPageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+    setBit(pos,bit,allocationPage);
+    writePageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+  }
+}
+
+void setBitRangeAllocationPage(uint16_t posStart, uint16_t posEnd,uint8_t bit){
+  if(bit == 0 || bit == 1){
+    uint8_t allocationPage[FLASH_PAGE_SIZE];
+    readPageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+    for(uint32_t i = posStart; i < posEnd; i ++){
+      setBit(i,bit,allocationPage);
+    }
+    writePageAuto(PAGE_ALLOCATION_PAGE,allocationPage);
+  }
+}
+
 uint32_t locateModule(uint32_t id){
   uint8_t allocationPage[FLASH_PAGE_SIZE];
   if(readPageAuto(PAGE_ALLOCATION_PAGE, allocationPage)){
@@ -78,6 +110,19 @@ uint32_t locateModule(uint32_t id){
     }
   }
   return 0;
+}
+
+bool deleteModule(uint32_t id){
+  uint32_t page = locateModule(id);
+  if(page){
+    uint32_t nxt = getNextAllocatedPage(page);
+    setBitRangeAllocationPage(page, nxt, 0);
+    setBitRangeAllocationPage(page - FLASH_LEN/2, nxt - FLASH_LEN/2,0);
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 static uint32_t __allocateFlash(uint32_t nPages){
@@ -246,15 +291,24 @@ bool kmUpload(char * line){
 
 bool kmDelete(char * line){
   char cmd[128];
+  uint32_t id = 0;
   memset(cmd,0,128);
   uint32_t arg = 0;
-  sscanf(line, "%*s %s",cmd);
+  sscanf(line, "%*s %s %d",cmd,&id);
   if(strlen(cmd) == 0){
-    printf("bad arguments for delete. usage: delete <[page] | [all]> [page number]\n");
+    printf("bad arguments for delete. usage: delete <[mod] | [all]> [page number]\n");
   }
   else if(strcmp(cmd,"all") == 0){
     clearAllocationPage();
     printf("all pages cleared\n");
+  }
+  else if(strcmp(cmd,"mod") == 0){
+    if(deleteModule(id)){
+      printf("module deleted\n");
+    }
+    else{
+      printf("ERROR, could not delete module! is id: %d right?\n", id);
+    }
   }
 
   return true;

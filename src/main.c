@@ -27,6 +27,24 @@ void SystemInit()
 
 //dump here if interrupt not handled!
 void defaultVector(){
+  uint32_t Maddr = 0;
+  uint32_t Paddr = 0;
+  uint32_t psr = 0;
+  asm(
+    "mrs %[ma], msp\n"
+    "mrs %[pa], psp\n"
+    "mrs %[psr], psr\n"
+  : [ma] "=r" (Maddr), [pa] "=r" (Paddr), [psr] "=r" (psr)
+  :
+  :);
+  printf("---CRASH DUMP---\n");
+  printf("PSR: %x\n", psr);
+  printf("---MAIN STACK---\n");
+  dumpHex((uint8_t*)Maddr, 100);
+  printf("---PROC STACK---\n");
+  dumpHex((uint8_t*)Paddr, 100);
+  printf("###CRASH DUMP###\n");
+
   while(1){
     sleep(1000);
     REG_PIOB_SODR |= PIO_PB27;
@@ -42,6 +60,9 @@ int main(void){
   //allocate dynamic memory. see config.h for size / location
   allocateKernelMemory((uint8_t*)KERNEL_DYNAMIC_MEMORY_START,KERNEL_DYNAMIC_MEMORY);
 
+  systickConfig(150);//CONTEXT_SWITCH_INTERVAL);
+  NVIC_SetPriority(PendSV_IRQn, 255);
+
   //load monitor handlers
   loadDefaultMonitorHandlers();
   addMemoryDebugKernelMonitor();
@@ -50,8 +71,22 @@ int main(void){
 
   printf("===ARMBoy===\n");
   while(1){
+    sleep(1000);
+
     if(hasPending()){
       servicePendingOperations();
+    }
+
+    currentPd = getNextReadyProcess();
+    if(currentPd){
+      printf("wtf\n");
+      currentPd->proc_state = PROCS_RUNNING;
+
+      runProcess(currentPd);
+
+      if(currentPd->proc_state == PROCS_RUNNING){
+        currentPd->proc_state = PROCS_READY;
+      }
     }
   }
 }

@@ -34,7 +34,10 @@ struct ProcessDescriptor{
   void * staticBase;
   void * jumpTableStart;
   void * binaryAddress;
+  void * stackPtr;
 } ProcessDescriptor;
+
+volatile struct ProcessDescriptor * currentPd;
 
 /**
   returns the process descriptor with the given pid.
@@ -86,6 +89,12 @@ bool unloadProcessCid(uint32_t cid);
   process can be returned here.
 */
 struct ProcessDescriptor * getNextReadyProcess();
+
+/**
+  runs the process described by pd. this function blocks until
+  process exits / yields / or systick expires.... i.e. this is a context switch
+*/
+void runProcess(volatile struct ProcessDescriptor * pd);
 
 /**
   add flash manager kernel monitor functions

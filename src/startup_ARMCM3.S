@@ -83,8 +83,8 @@ __isr_vector:
 	.long	SVC_IRQ           /* SVCall Handler */
 	.long	defaultVector      /* Debug Monitor Handler */
 	.long	0                     /* Reserved */
-	.long	defaultVector        /* PendSV Handler */
-	.long	defaultVector       /* SysTick Handler */
+	.long	PENDSV_IRQ        /* PendSV Handler */
+	.long	SYS_TICK_IRQ       /* SysTick Handler */
 
 	/* External interrupts */
   .long defaultVector /**<  0 SAM3X8E Supply Controller (SUPC) */
