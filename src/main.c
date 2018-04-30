@@ -60,7 +60,7 @@ int main(void){
   //allocate dynamic memory. see config.h for size / location
   allocateKernelMemory((uint8_t*)KERNEL_DYNAMIC_MEMORY_START,KERNEL_DYNAMIC_MEMORY);
 
-  systickConfig(150);//CONTEXT_SWITCH_INTERVAL);
+  systickConfig(CONTEXT_SWITCH_INTERVAL);
   NVIC_SetPriority(PendSV_IRQn, 255);
 
   //load monitor handlers
@@ -70,16 +70,13 @@ int main(void){
   addProgManagerKernelMonitorFunctions();
 
   printf("===ARMBoy===\n");
-  while(1){
-    sleep(1000);
-
+  for(;;){
     if(hasPending()){
       servicePendingOperations();
     }
 
     currentPd = getNextReadyProcess();
     if(currentPd){
-      printf("wtf\n");
       currentPd->proc_state = PROCS_RUNNING;
 
       runProcess(currentPd);
