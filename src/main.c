@@ -15,10 +15,8 @@ void SystemInit()
 {
   setupMainClock();
 
-  REG_PMC_PCER0 |= PMC_PCER0_PID12; // enable PIO controller B
-  REG_PIOB_PER |= PIO_PB27;
-  REG_PIOB_OER |= PIO_PB27;
-  REG_PIOB_OWER |= PIO_PB27;
+  enableIOBank(PIO_BANK_B);
+  enablePin(PIO_BANK_B, PIO_PB27, PIO_OUT);
 
   //disable watchdog
   REG_WDT_MR &= ~WDT_MR_WDRSTEN;

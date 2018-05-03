@@ -3,6 +3,7 @@
 
 #ifdef MCU_SAM3X8E
 //sam3x8e includes
+#include "sam3x8eHardwareAPI/src/PIO/pio.h"
 #include "sam3x8eHardwareAPI/src/EEFC/eefc.h"
 #include "sam3x8eHardwareAPI/src/UART/uart.h"
 #include "sam3x8eHardwareAPI/src/Timers/timers.h"
