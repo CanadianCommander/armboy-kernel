@@ -15,4 +15,7 @@ typedef struct {
   uint32_t pin;
 } Pin;
 
+#define SET_PIN(p,v) setPin(p.bank,p.pin,v)
+#define READ_PIN(p) readPin(p.bank,p.pin)
+
 #endif /*MISC_H_*/
