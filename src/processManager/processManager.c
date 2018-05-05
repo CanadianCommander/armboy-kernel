@@ -30,6 +30,9 @@ static void __freePid(struct ProcessDescriptor * pd){
 
 #define FUNCTION_BASE_ADDR 0x80000
 static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_t * srcAddr){
+  //word alige
+  targetAddr = targetAddr + WORD - ((uint32_t)targetAddr % WORD);
+
   uint8_t * data = srcAddr + fh->data_start;
   uint8_t * bss  = srcAddr + fh->bss_start;
   uint8_t * got  = srcAddr + fh->got_start;
@@ -40,13 +43,20 @@ static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_
 
   memcpy(targetAddr, got, glen);
   memcpy(targetAddr + glen, data, dlen);
-  memcpy(targetAddr + dlen + glen, bss, blen);
+  memset(targetAddr + dlen + glen, 0, blen);
 
   //update got table
   uint32_t * wGot = (uint32_t *)(targetAddr);
   for(uint32_t i = 0; i < glen/4; i ++){
     if(*(wGot + i) < FUNCTION_BASE_ADDR){
-      *(wGot + i) = (*(wGot + i) - fh->got_start) + (uint32_t)targetAddr;
+      if(*(wGot + i) < fh->text_end){
+        //module function
+        *(wGot + i) = *(wGot + i) + (uint32_t)srcAddr;
+      }
+      else{
+        //data
+        *(wGot + i) = (*(wGot + i) - fh->got_start) + (uint32_t)targetAddr;
+      }
     }
   }
   return (void*)wGot;
@@ -94,7 +104,7 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
         freepd->jumpTableStart = fh.jumpTableStart;
         freepd->cid = fh.id;
 
-        mh = requestMemory(fh.reqHeapSize + staticSize, staticSize , freepd->pid);
+        mh = requestMemory(fh.reqHeapSize + staticSize + WORD, staticSize + WORD, freepd->pid);
 
         freepd->staticBase = relocateData(mh->memptr, &fh, binaryStartPtr);
       }
@@ -277,14 +287,14 @@ static bool call(char * line){
     struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
     if(pd){
       uint32_t jump = (*((uint32_t*)pd->jumpTableStart + jv) + (uint32_t)pd->binaryAddress);
-      printf("jumping to %x\n", jump);
+      printf("jumping to %x with SB: %x \n", jump, (uint32_t)pd->staticBase);
       asm(
         "mov r9, %[staticB] \n"
         "blx %[jumpAddr] "
         :
         : [jumpAddr] "r" (jump),
           [staticB] "r" ((uint32_t)pd->staticBase)
-        : "r0", "r1", "r2", "r3", "r9", "pc", "sp", "lr", "memory"
+        : "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r8", "r9", "r10", "pc", "sp", "lr", "memory"
       );
     }
     else{
@@ -357,7 +367,7 @@ static bool jump(char * line){
       "blx %[jumpAddr] "
       :
       : [jumpAddr] "r" (jumpAddr)
-      : "r0", "r1", "r2", "r3", "pc", "sp", "lr", "memory"
+      : "r0", "r2", "r3", "r4", "r5", "r6", "r8", "r9", "r10", "r11", "r12", "pc", "sp", "lr", "memory"
     );
   }
   else{

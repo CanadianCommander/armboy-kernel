@@ -15,6 +15,8 @@ typedef struct {
   uint32_t pin;
 } Pin;
 
+Pin toPin(uint8_t bank, uint32_t pin);
+
 #define SET_PIN(p,v) setPin(p.bank,p.pin,v)
 #define READ_PIN(p) readPin(p.bank,p.pin)
 

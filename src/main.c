@@ -39,9 +39,13 @@ void defaultVector(){
   printf("PSR: %x\n", psr);
   printf("---MAIN STACK---\n");
   dumpHex((uint8_t*)Maddr, 100);
-  printf("---PROC STACK---\n");
-  dumpHex((uint8_t*)Paddr, 100);
+  if(Paddr > 0x20070000 && Paddr < 0x20089999){
+    printf("---PROC STACK---\n");
+    dumpHex((uint8_t*)Paddr, 100);
+  }
   printf("###CRASH DUMP###\n");
+
+  dumpHex((uint8_t*)0x20071b09, 200);
 
   while(1){
     sleep(1000);
