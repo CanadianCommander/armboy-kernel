@@ -63,6 +63,11 @@ struct ProcessDescriptor * findProcessDescriptorCid(uint32_t cid);
 */
 struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t proc_type);
 
+/**
+  like loadProcess but loads the kernel module with id "mid".
+  @return process handle or NULL on failure
+*/
+struct ProcessDescriptor * loadKernelModule(uint16_t mid);
 
 /**
   unload the process described by process descriptor pd

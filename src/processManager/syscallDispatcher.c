@@ -30,11 +30,12 @@ void SVC_IRQ_main(unsigned int * svc_args){
       //r1 contains arg
       doModuleCall((0xFFFF0000 & (svc_args[0])) >> 16, (0x0000FFFF & (svc_args[0])), svc_args[1]);
       break;
+    case SYS_CALL_LOAD_MOD:
+      loadKernelModule(svc_args[0]);
+      break;
     default:
       break;
   }
-
-
 }
 
 

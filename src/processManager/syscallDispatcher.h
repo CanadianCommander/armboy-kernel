@@ -8,6 +8,7 @@
 #define SYS_CALL_ABORT 0x1 // kill caller
 #define SYS_CALL_BLOCK 0x2 // block caller
 #define SYS_CALL_MOD   0x3 // call kernel module function
+#define SYS_CALL_LOAD_MOD 0x4
 // ***************************
 
 

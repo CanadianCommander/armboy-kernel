@@ -115,18 +115,27 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
     else {
       freepd->staticBase = 0;
       freepd->cid = 0;
-
-      //code is half word aligned
-      if((uint32_t)binaryStartPtr % 2 != 0){
-        freepd->jumpTableStart = (uint8_t*)binaryStartPtr + 1;
-      }
-      else {
-        freepd->jumpTableStart = binaryStartPtr;
-      }
+      freepd->jumpTableStart = binaryStartPtr;
     }
 
     freepd->proc_state = PROCS_READY;
     return freepd;
+  }
+  else {
+    return NULL;
+  }
+}
+
+struct ProcessDescriptor * loadKernelModule(uint16_t mid){
+  uint32_t page = locateModule(mid);
+  if(page){
+    struct ProcessDescriptor * pd = loadProcess(getFlashStartAddress(0) + page*FLASH_PAGE_SIZE, true, PROC_TYPE_KMOD);
+    if(pd){
+      return pd;
+    }
+    else {
+      return NULL;
+    }
   }
   else {
     return NULL;
@@ -198,17 +207,9 @@ void runProcess(volatile struct ProcessDescriptor * pd){
 static uint32_t* initializeStack(uint32_t * sPtr, void * binAddr, void * jumpAddr){
   *sPtr = INITIAL_STATUS_REG;
   sPtr--;
-  if((uint32_t)binAddr % 2 != 0){
-    *sPtr = (uint32_t)binAddr + *(uint32_t*)jumpAddr;//pc
-    sPtr--;
-    *sPtr = 0x0;//lr
-  }
-  else {
-    //fix me
-    *sPtr = (uint32_t)binAddr + 1 + *(uint32_t*)jumpAddr;//pc
-    sPtr--;
-    *sPtr = 0x0;//lr
-  }
+  *sPtr = (uint32_t)binAddr + *(uint32_t*)jumpAddr;//pc
+  sPtr--;
+  *sPtr = 0x0;//lr
 
   //r0 - r3 + r12 all zero
   memset(sPtr - 5,0,5*4);

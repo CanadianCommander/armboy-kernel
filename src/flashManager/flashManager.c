@@ -178,11 +178,11 @@ bool kmUploadUser(char * line){
   uint32_t checksum = 0;
   sscanf(line, "%*s %d %d %d %u", &binLen, &hLen, &sLen, &checksum);
   if(binLen && binLen % UPLOAD_USER_CHUNK_SIZE == 0 && hLen && sLen && checksum){
-    struct MemoryHandle * mh = requestMemory(binLen + hLen + sLen + 1, binLen, KERNEL_PID);
+    struct MemoryHandle * mh = requestMemory(binLen + hLen + sLen + WORD, binLen, KERNEL_PID);
     if(mh){
       uint8_t * mPtr = mh->memptr;
-      //half word align
-      if((uint32_t)mPtr % 2 != 0)mPtr++;
+      //word align
+      if((uint32_t)mPtr % WORD != 0)mPtr+= WORD - ((uint32_t)mPtr % WORD);
 
       uint8_t buffer[UPLOAD_USER_CHUNK_SIZE];
       checksum = ~checksum + 1;
@@ -211,7 +211,7 @@ bool kmUploadUser(char * line){
       }
       else {
         uint8_t * memaddr = mh->memptr;
-        if((uint32_t)memaddr % 2 != 0)memaddr++;
+        if((uint32_t)memaddr % WORD != 0)memaddr+= WORD - ((uint32_t)memaddr % WORD);
 
         struct ProcessDescriptor * pd = loadProcess(memaddr,false,PROC_TYPE_USER);
         transferMemory(mh,pd->pid);
