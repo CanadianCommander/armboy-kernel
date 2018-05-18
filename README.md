@@ -6,6 +6,7 @@ around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the o
 - [sam3x8e hardware api](https://github.com/CanadianCommander/sam3x8eHardwareAPI)
 - [ArmBoy Flasher tool](https://github.com/CanadianCommander/ARMBoyFlasher)
 - [SSD1289 lcd driver](https://github.com/CanadianCommander/armboy_SSD1289lcdDriver)
+- [user input driver](https://github.com/CanadianCommander/ArmboyInputDriver)
 - [System API](https://github.com/CanadianCommander/armboy-api)
 
 ## documentation  
