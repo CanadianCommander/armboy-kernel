@@ -95,7 +95,7 @@ __isr_vector:
   .long defaultVector /**<  5 SAM3X8E Power Management Controller (PMC) */
   .long defaultVector /**<  6 SAM3X8E Enhanced Flash Controller 0 (EFC0) */
   .long defaultVector /**<  7 SAM3X8E Enhanced Flash Controller 1 (EFC1) */
-  .long UART_ISR /**<  8 SAM3X8E Universal Asynchronous Receiver Transceiver (UART) */
+  .long UART_ISR      /**<  8 SAM3X8E Universal Asynchronous Receiver Transceiver (UART) */
   .long defaultVector /**<  9 SAM3X8E Static Memory Controller (SMC) */
   .long defaultVector /**< 11 SAM3X8E Parallel I/O Controller A, (PIOA) */
   .long defaultVector /**< 12 SAM3X8E Parallel I/O Controller B (PIOB) */

@@ -8,6 +8,7 @@
 #include "memoryManager/memoryManager.h"
 #include "flashManager/flashManager.h"
 #include "processManager/processManager.h"
+#include <memory.h>
 #pragma import(__use_no_heap)
 
 #ifndef __NO_SYSTEM_INIT

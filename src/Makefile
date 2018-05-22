@@ -4,7 +4,7 @@ CFLAGS = --std=gnu11 -Ofast -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.
 INCLD = -I ../../../../tools/ATMEL/ -I ../../../../tools/CMSIS/include
 TARGET ?= sam3x8e # target board
 
-SRC_CC = *.c processManager/*.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c startup_ARMCM3.S hardware/api.a
+SRC_CC = *.c processManager/*.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c startup_ARMCM3.S hardware/api.o
 SRC_O = *.o
 
 kernel.bin : kernel.elf
@@ -13,8 +13,8 @@ kernel.bin : kernel.elf
 kernel.elf : $(SRC_CC)
 	$(CC) $(CFLAGS) -o kernel.elf $^ $(INCLD)
 
-.PHONY: hardware/api.a
-hardware/api.a : hardware/Makefile
+.PHONY: hardware/api.o
+hardware/api.o : hardware/Makefile
 	(TARGET=$(TARGET); export TARGET ; make -C hardware ;)
 
 clean:
