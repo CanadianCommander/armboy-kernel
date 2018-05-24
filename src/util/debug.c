@@ -40,7 +40,7 @@ void printSysInfo(void){
 }
 
 
-#define DUMP_BYTES_PER_LINE 12
+#define DUMP_BYTES_PER_LINE 16
 void dumpHex(uint8_t * hexBuffer, uint16_t len){
   for(uint16_t i =0; i < len; i ++){
     if((i % DUMP_BYTES_PER_LINE) == 0){
