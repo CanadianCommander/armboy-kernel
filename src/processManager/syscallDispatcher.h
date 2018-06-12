@@ -18,6 +18,6 @@
   @param jVec offset in to vector table. i.e. 0 == first method,  1 == second ... ect
   @param arg kernel module argument most likely a pointer
 */
-void doModuleCall(uint32_t cid, uint8_t jVec, uint32_t arg);
+void doModuleCall(uint32_t cid, uint16_t jVec, uint32_t arg);
 
 #endif /*SYSCALL_DISPATCHER_H_*/

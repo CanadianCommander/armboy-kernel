@@ -39,20 +39,26 @@ void SVC_IRQ_main(unsigned int * svc_args){
 }
 
 
-void doModuleCall(uint32_t cid, uint8_t jVec, uint32_t arg){
-  struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
-  if(pd){
-    uint32_t jump = (*((uint32_t*)pd->jumpTableStart + jVec) + (uint32_t)pd->binaryAddress);
-    asm(
-      "mov r9, %[staticB] \n"
-      "mov r0, %[arg]\n"
-      "blx %[jumpAddr] "
-      :
-      : [jumpAddr] "r" (jump),
-        [staticB] "r" ((uint32_t)pd->staticBase),
-        [arg] "r" (arg)
-      : "r0", "r1", "r2", "r3", "r9", "pc", "sp", "lr", "memory"
-    );
+void doModuleCall(uint32_t cid, uint16_t jVec, uint32_t arg){
+  if(cid != 0){
+    struct ProcessDescriptor * pd = findProcessDescriptorCid(cid);
+    if(pd){
+      uint32_t jump = (*((uint32_t*)pd->jumpTableStart + jVec) + (uint32_t)pd->binaryAddress);
+      asm(
+        "mov r9, %[staticB] \n"
+        "mov r0, %[arg]\n"
+        "blx %[jumpAddr] "
+        :
+        : [jumpAddr] "r" (jump),
+          [staticB] "r" ((uint32_t)pd->staticBase),
+          [arg] "r" (arg)
+        : "r0", "r1", "r2", "r3", "r9", "pc", "sp", "lr", "memory"
+      );
+    }
+  }
+  else {
+    //core function
+
   }
 }
 //00080a0c

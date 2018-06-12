@@ -62,6 +62,7 @@ int main(void){
   initRTT();
   //allocate dynamic memory. see config.h for size / location
   allocateKernelMemory((uint8_t*)KERNEL_DYNAMIC_MEMORY_START,KERNEL_DYNAMIC_MEMORY);
+  startTRNG();
 
   systickConfig(CONTEXT_SWITCH_INTERVAL);
   NVIC_SetPriority(PendSV_IRQn, 255);
