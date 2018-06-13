@@ -1,4 +1,5 @@
 #include "coreFunctions.h"
+#include "../config.h"
 #include "../hardware/hardware.h"
 
 void doCoreFunction(uint16_t funcId, void * arg){
@@ -21,5 +22,5 @@ void getRandom(void * rnd){
 
 // sleep for the amount of milliseconds pointed to by ms
 void doSleep(void * ms){
-  sleep(*(uint32_t)ms);
+  sleep(*(uint32_t*)ms);
 }

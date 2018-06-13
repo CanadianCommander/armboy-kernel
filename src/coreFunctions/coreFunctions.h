@@ -4,6 +4,8 @@
 */
 #ifndef CORE_FUNCTIONS_H_
 #define CORE_FUNCTIONS_H_
+#include <stdint.h>
+#include <stdio.h>
 
 /** function ids **/
 #define CF_RANDOM     0

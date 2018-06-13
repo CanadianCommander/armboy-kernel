@@ -1,5 +1,6 @@
 #include "syscallDispatcher.h"
 #include "processManager.h"
+#include "../coreFunctions/coreFunctions.h"
 
 __attribute__ ((naked)) void SVC_IRQ(void){
   asm(
@@ -58,7 +59,7 @@ void doModuleCall(uint32_t cid, uint16_t jVec, uint32_t arg){
   }
   else {
     //core function
-
+    doCoreFunction(jVec, (void*)arg);
   }
 }
 //00080a0c

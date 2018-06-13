@@ -4,7 +4,7 @@ CFLAGS = --std=gnu11 -Ofast -mcpu=cortex-m3 -mthumb -fno-builtin  --specs=nosys.
 INCLD = -I ./hardware/sam3x8eHardwareAPI/3rdParty/ATMEL/ -I ./hardware/sam3x8eHardwareAPI/3rdParty/CMSIS/include
 TARGET ?= sam3x8e # target board
 
-SRC_CC = *.c processManager/*.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c startup_ARMCM3.S hardware/api.o
+SRC_CC = *.c processManager/*.c flashManager/*.c memoryManager/*.c util/*.c kernelMonitor/*.c coreFunctions/*.c startup_ARMCM3.S hardware/api.o
 SRC_O = *.o
 
 kernel.bin : kernel.elf
