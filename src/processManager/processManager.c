@@ -13,6 +13,8 @@ static struct ProcessDescriptor pdList[MAX_PROCESS];
 
 volatile struct ProcessDescriptor * currentPd = NULL;
 
+static void parseSRAMHeader(struct FlashHeader * fh, uint8_t * addr);
+
 static pid_t __getNewPid(struct ProcessDescriptor *pd){
   for(int i =0; i < MAX_PROCESS; i ++){
     if(pd == (pdList + i)){
@@ -29,6 +31,23 @@ static void __freePid(struct ProcessDescriptor * pd){
 }
 
 #define FUNCTION_BASE_ADDR 0x80000
+static void updateGotTable(uint8_t * textAddr, uint8_t * gotAddress, struct FlashHeader * fh){
+  //update got table
+  uint32_t * wGot = (uint32_t *)(gotAddress);
+  for(uint32_t i = 0; i < (fh->got_end  - fh->got_start)/4; i ++){
+    if(*(wGot + i) < FUNCTION_BASE_ADDR){
+      if(*(wGot + i) < fh->text_end){
+        //module function
+        *(wGot + i) = *(wGot + i) + (uint32_t)textAddr;
+      }
+      else{
+        //data
+        *(wGot + i) = (*(wGot + i) - fh->got_start) + (uint32_t)gotAddress;
+      }
+    }
+  }
+}
+
 static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_t * srcAddr){
   //word alige
   targetAddr = targetAddr + WORD - ((uint32_t)targetAddr % WORD);
@@ -46,20 +65,8 @@ static void * relocateData(uint8_t * targetAddr, struct FlashHeader * fh, uint8_
   memset(targetAddr + dlen + glen, 0, blen);
 
   //update got table
-  uint32_t * wGot = (uint32_t *)(targetAddr);
-  for(uint32_t i = 0; i < glen/4; i ++){
-    if(*(wGot + i) < FUNCTION_BASE_ADDR){
-      if(*(wGot + i) < fh->text_end){
-        //module function
-        *(wGot + i) = *(wGot + i) + (uint32_t)srcAddr;
-      }
-      else{
-        //data
-        *(wGot + i) = (*(wGot + i) - fh->got_start) + (uint32_t)targetAddr;
-      }
-    }
-  }
-  return (void*)wGot;
+  updateGotTable(srcAddr, targetAddr, fh);
+  return (void*)targetAddr;
 }
 
 struct ProcessDescriptor * findProcessDescriptor(pid_t pid){
@@ -113,9 +120,10 @@ struct ProcessDescriptor * loadProcess(void * binaryStartPtr,bool flash,uint8_t 
       }
     }
     else {
-      freepd->staticBase = 0;
-      freepd->cid = 0;
-      freepd->jumpTableStart = binaryStartPtr;
+      struct FlashHeader fh;
+      parseSRAMHeader(&fh, (uint8_t*)binaryStartPtr);
+      freepd->jumpTableStart = fh.jumpTableStart;
+      updateGotTable((uint8_t*)binaryStartPtr, (uint8_t*)(binaryStartPtr) + fh.got_start, &fh);
     }
 
     freepd->proc_state = PROCS_READY;
@@ -240,6 +248,23 @@ static uint32_t* initializeStack(uint32_t * sPtr, void * binAddr, void * jumpAdd
   *//********************/
 
   return sPtr;
+}
+
+static void parseSRAMHeader(struct FlashHeader * fh, uint8_t * addr){
+  memset(fh, 0 , sizeof(struct FlashHeader));
+
+  uint32_t * ptr = (uint32_t*)addr;
+  fh->text_start    = *ptr++;
+  fh->text_end      = *ptr++;
+  fh->got_start     = *ptr++;
+  fh->got_end       = *ptr++;
+  fh->data_start    = *ptr++;
+  fh->data_end      = *ptr++;
+  fh->bss_start     = *ptr++;
+  fh->bss_end       = *ptr++;
+  fh->reqHeapSize   = *ptr++;
+  fh->reqStackSize  = *ptr++;
+  fh->jumpTableStart = (void*)ptr;
 }
 
 

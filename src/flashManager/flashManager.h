@@ -35,6 +35,7 @@ struct FlashHeader {
   uint32_t bss_end;
 
   uint32_t reqHeapSize;
+  uint32_t reqStackSize;
 
   void * jumpTableStart;
 } FlashHeader;
