@@ -176,10 +176,12 @@ bool kmUploadUser(char * line){
   uint32_t hLen = 0;
   uint32_t sLen = 0;
   uint32_t checksum = 0;
-  sscanf(line, "%*s %d %d %d %u", &binLen, &hLen, &sLen, &checksum);
+  uint32_t bssLen = 0;
+  sscanf(line, "%*s %d %d %d %d %u", &binLen, &hLen, &sLen, &bssLen, &checksum);
   if(binLen && binLen % UPLOAD_USER_CHUNK_SIZE == 0 && hLen && sLen && checksum){
-    struct MemoryHandle * mh = requestMemory(binLen + hLen + sLen + WORD, binLen, KERNEL_PID);
+    struct MemoryHandle * mh = requestMemory(binLen + bssLen  + hLen + sLen + WORD, binLen + bssLen, KERNEL_PID);
     if(mh){
+      memset(mh->memptr + binLen, 0 , bssLen);
       uint8_t * mPtr = mh->memptr;
       //word align
       if((uint32_t)mPtr % WORD != 0)mPtr+= WORD - ((uint32_t)mPtr % WORD);
@@ -223,7 +225,7 @@ bool kmUploadUser(char * line){
     }
   }
   else {
-    printf("ERROR, usage: u_upload <binary length (multiple of %d bytes)> <heap size> <stack size> <checksum>\n", UPLOAD_USER_CHUNK_SIZE);
+    printf("ERROR, usage: u_upload <binary length (multiple of %d bytes)> <heap size> <stack size> <bss length> <checksum>\n", UPLOAD_USER_CHUNK_SIZE);
   }
 
   return true;
