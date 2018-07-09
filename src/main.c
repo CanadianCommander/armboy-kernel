@@ -8,6 +8,7 @@
 #include "memoryManager/memoryManager.h"
 #include "flashManager/flashManager.h"
 #include "processManager/processManager.h"
+#include "processManager/syscallDispatcher.h"
 #include <memory.h>
 #pragma import(__use_no_heap)
 
@@ -72,6 +73,13 @@ int main(void){
   addMemoryDebugKernelMonitor();
   addFlashKernelMonitorFunctions();
   addProgManagerKernelMonitorFunctions();
+
+  //attempt to load bootstrapper module
+  //TODO standardize module ids (currently 1 = display, 2 = input, 3 = filesystem, 4 = bootstrapper)
+  struct ProcessDescriptor * bootPd = loadKernelModule(4);
+  if(bootPd){
+    doModuleCall(bootPd->cid, 0, 0);
+  }
 
   printf("===ARMBoy===\n");
   for(;;){

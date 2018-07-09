@@ -179,13 +179,13 @@ bool unloadProcessCid(uint32_t cid){
   return unloadProcess(pd);
 }
 
-static volatile uint32_t getNextReadyProcess_i = 0;
+static volatile uint32_t lastRunProcess = 0;
 struct ProcessDescriptor * getNextReadyProcess(){
-  uint32_t old = getNextReadyProcess_i;
   for(int i =0; i < 2; i ++){
-    for(getNextReadyProcess_i = getNextReadyProcess_i*(1 - i); getNextReadyProcess_i < ((MAX_PROCESS*(1-i)) + old*i) ; getNextReadyProcess_i++){
-      if(pdList[i].pid != BAD_PID && pdList[i].proc_type == PROC_TYPE_USER && pdList[i].proc_state == PROCS_READY){
-        return pdList + i;
+    for(int z = (lastRunProcess+1)*(1 - i); z < MAX_PROCESS*(1 - i) + (lastRunProcess+1)*(i);z++){
+      if(pdList[z].pid != BAD_PID && pdList[z].proc_type == PROC_TYPE_USER && pdList[z].proc_state == PROCS_READY){
+        lastRunProcess = z;
+        return pdList + z;
       }
     }
   }
