@@ -2,13 +2,14 @@
 the armboy kernel is the kernel used by the armboy gaming system. It is designed to run on a sam3x8e processor, based
 around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the ones found on the teensy boards.
 
-### related repos
+### Armboy Ecosystem
 - [sam3x8e hardware api](https://github.com/CanadianCommander/sam3x8eHardwareAPI)
 - [ArmBoy Flasher tool](https://github.com/CanadianCommander/ARMBoyFlasher)
 - [SSD1289 lcd driver](https://github.com/CanadianCommander/armboy_SSD1289lcdDriver)
 - [user input driver](https://github.com/CanadianCommander/ArmboyInputDriver)
 - [FAT32 file system driver](https://github.com/CanadianCommander/armboy-fs)
 - [System API](https://github.com/CanadianCommander/armboy-api)
+- [Bootstrapper](https://github.com/CanadianCommander/armboy-init)
 
 ## documentation  
 kernel documentation can be found in the github wiki (have to you know write the kernel before I can
