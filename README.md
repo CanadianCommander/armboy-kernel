@@ -1,6 +1,6 @@
 # ARMBoy &trade; Kernel.
 the armboy kernel is the kernel used by the armboy gaming system. It is designed to run on a sam3x8e processor, based
-around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the ones found on the teensy boards.
+around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the ones found on the Teensy boards.
 
 ### Armboy Ecosystem
 - [sam3x8e hardware api](https://github.com/CanadianCommander/sam3x8eHardwareAPI)
@@ -11,7 +11,7 @@ around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the o
 - [System API](https://github.com/CanadianCommander/armboy-api)
 - [Bootstrapper](https://github.com/CanadianCommander/armboy-init)
 
-## documentation  
+## Documentation  
 read the [wiki](https://github.com/CanadianCommander/armboy-kernel/wiki) and look in the header files for premium function descriptions.
 
 ## Building
