@@ -12,7 +12,7 @@ around the cortex-M3. it should be fairly adaptable to a cortex-M4 such as the o
 - [Bootstrapper](https://github.com/CanadianCommander/armboy-init)
 
 ## documentation  
-read the wiki. and look in the header files for premium function descriptions.
+read the [wiki](https://github.com/CanadianCommander/armboy-kernel/wiki) and look in the header files for premium function descriptions.
 
 ## Building
 *only compatible with Linux/MacOS*
@@ -45,3 +45,22 @@ read the wiki. and look in the header files for premium function descriptions.
 8. Continue building and uploading modules untill you have uploaded the kernel, along with,  [SSD1289 lcd driver](https://github.com/CanadianCommander/armboy_SSD1289lcdDriver), [user input driver](https://github.com/CanadianCommander/ArmboyInputDriver), [FAT32 file system driver](https://github.com/CanadianCommander/armboy-fs) and [Bootstrapper](https://github.com/CanadianCommander/armboy-init).
 
 9. At this point your system should be able to run the examples found in [System API](https://github.com/CanadianCommander/armboy-api). Build the example and put it on a FAT32 formatted SD card as `boot.bin` (along with any assets it requires). Insert the card in to your ArmBoy and when you power it up the example program will start! Note, you can also flash/upload programs to the system over the debug port using the [ArmBoy Flasher tool](https://github.com/CanadianCommander/ARMBoyFlasher).
+
+## Debug Terminal.
+The ArmBoy has a debug terminal through which you can control / monitor the system as it runs. To connect to this terminal you will need a serial terminal application like the one provided by the Arduino IDE. I recommend the `miniterminal` application provided by `pySerial`. To install on Debian based systems `sudo apt install python3-serial`. Then to use it type, `miniterm --echo`. The debug terminal has many commands, some good ones are:
+- `poke <address> <new hex value of word>` this function allows you to change memory words (SRAM and Registers).
+- `peek <address> <number of bytes in hex>` dumps to terminal the contents of memory starting at address for len bytes.
+- `memdump` print list of allocated memory regions.
+- `malloc <size in bytes>` manually allocate a memory region of len bytes
+- `free <address>` free the memory block at address
+- `hwalk <address of heap>` walk the heap data structure at address.
+- `lsf` list kernel modules stored in flash memory
+- `u_upload` and `upload` used by [ArmBoy Flasher tool](https://github.com/CanadianCommander/ARMBoyFlasher) to flash kernel modules and user programs to the device. not practically usable by a human. Though it is technically possible.
+- `delete all` delete all kernel modules stored in flash memory and zero allocation bitmap. This command MUST be issued before uploading kernel modules as flash memory defaults to all 1 (all flash pages allocated).
+- `delete mod <id>` delete the kernel module with, id, from flash memory. (`lsf` can tell you the ids)
+- `insmod <id>` load kernel module with id.
+- `lsmod` list all loaded kernel modules.
+- `rmmod <id>` unload kernel module with id.
+- `call <id> <jump offset>` call function of the kernel module with id, at the specified jump offset. Ex: if the LCD kernel module is loaded and has id 1 then, `call 1 1` would initialize the LCD and clear it to black (because jump vector 1 is defined as `initDefault` in the LCD driver).
+- `jump <address>` jump like a mad man! execution immediately jumps to the specified address! most likely causing a crash!
+
