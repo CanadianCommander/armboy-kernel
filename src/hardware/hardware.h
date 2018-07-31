@@ -1,3 +1,8 @@
+/**
+@file
+@brief selects hardware api based on preprocessor definitions 
+*/
+
 #ifndef HARDWARE_H_
 #define HARDWARE_H_
 

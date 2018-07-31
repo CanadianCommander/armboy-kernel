@@ -7,7 +7,8 @@
 #include <stdint.h>
 
 /**
-  delete a section from an array and fill it in.
+  delete a section from an array and collapse other sections in such that there is no gap left
+  by the deletion 
   @param array target array of delete operation
   @param removeAt index in to array at which to start remove
   @param lenRemove the number of elements to remove

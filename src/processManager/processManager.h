@@ -1,3 +1,8 @@
+/**
+@file
+@brief functions for managing dynamic loading and unloading of processes 
+*/
+
 #ifndef PROCESS_MANAGER_H_
 #define PROCESS_MANAGER_H_
 #include <stdint.h>
